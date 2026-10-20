@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Mathematical 25</title>
+
+    <link
+        rel="stylesheet"
+        href="./public/css/style.css"
+    >
+
+</head>
+
+<body>
+
+
+<!-- ==========================================
+     TÍTULO PRINCIPAL
+========================================== -->
+
+<h1 class="page-title">
+    MATHEMATICAL 25
+</h1>
+
+
+<!-- ==========================================
+     BOTÓN DE REGLAS
+========================================== -->
+
+<button
+    id="rules-button"
+    class="rules-button"
+    title="Ver reglas"
+>
+    📖
+</button>
+
+
+<!-- ==========================================
+     MODAL DE REGLAS
+========================================== -->
+
+<div
+    id="rules-modal"
+    class="overlay"
+>
+
+    <div class="rules-window">
+
+        <div class="modal-header">
+
+            <h2>
+                📖 REGLAS DE MATHEMATICAL 25
+            </h2>
+
+            <button
+                id="close-rules"
+                class="close-button"
+            >
+                ✕
+            </button>
+
+        </div>
+
+
+        <div class="rules-content">
+
+            <section class="rules-section">
+
+                <h3>🎯 Objetivo</h3>
+
+                <p>
+                    Obtén una puntuación lo más cercana posible a
+                    <strong>25</strong> sin superar ese valor.
+                </p>
+
+            </section>
+
+
+            <section class="rules-section">
+
+                <h3>🃏 Las cartas</h3>
+
+                <p>
+                    El juego utiliza una baraja de
+                    <strong>28 cartas</strong>:
+                    13 corazones y 13 espadas.
+                </p>
+
+
+                <div class="rules-deck">
+
+                    <div class="rules-suit-title red-suit">
+                        ♥ CORAZONES
+                    </div>
+
+                    <div class="rules-cards">
+
+                        <div class="rules-card red-card">
+                            <strong>A♥</strong>
+                            <span>14</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>2♥</strong>
+                            <span>2</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>3♥</strong>
+                            <span>3</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>4♥</strong>
+                            <span>4</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>5♥</strong>
+                            <span>5</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>6♥</strong>
+                            <span>6</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>7♥</strong>
+                            <span>7</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>8♥</strong>
+                            <span>8</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>9♥</strong>
+                            <span>9</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>10♥</strong>
+                            <span>10</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>J♥</strong>
+                            <span>11</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>Q♥</strong>
+                            <span>12</span>
+                        </div>
+
+                        <div class="rules-card red-card">
+                            <strong>K♥</strong>
+                            <span>13</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="rules-suit-title black-suit">
+                        ♠ ESPADAS
+                    </div>
+
+                    <div class="rules-cards">
+
+                        <div class="rules-card black-card">
+                            <strong>A♠</strong>
+                            <span>14</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>2♠</strong>
+                            <span>2</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>3♠</strong>
+                            <span>3</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>4♠</strong>
+                            <span>4</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>5♠</strong>
+                            <span>5</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>6♠</strong>
+                            <span>6</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>7♠</strong>
+                            <span>7</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>8♠</strong>
+                            <span>8</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>9♠</strong>
+                            <span>9</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>10♠</strong>
+                            <span>10</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>J♠</strong>
+                            <span>11</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>Q♠</strong>
+                            <span>12</span>
+                        </div>
+
+                        <div class="rules-card black-card">
+                            <strong>K♠</strong>
+                            <span>13</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="rules-suit-title black-suit">
+                    🃏 JOKERS
+                </div>
+
+                <div class="rules-cards">
+
+                    <div class="rules-card joker-card">
+
+                        <span class="rules-joker-top">
+                            JOKER
+                        </span>
+
+                        <strong>
+                            J
+                        </strong>
+
+                        <span class="rules-joker-bottom">
+                            JOKER
+                        </span>
+
+                    </div>
+
+                    <div class="rules-card joker-card">
+
+                        <span class="rules-joker-top">
+                            JOKER
+                        </span>
+
+                        <strong>
+                            J
+                        </strong>
+
+                        <span class="rules-joker-bottom">
+                            JOKER
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <p class="deck-note">
+                    El número debajo de cada carta corresponde
+                    a su valor matemático.
+                </p>
+
+                <p class="deck-note">
+                    * Un Joker vale 1. Si tienes ambos Jokers,
+                    los dos valen 14, como un AS. Los Jokers nunca
+                    cuentan como carta más alta.
+                </p>
+
+            </section>
+
+
+            <section class="rules-section">
+
+                <h3>➗ Puntuación</h3>
+
+                <p>
+                    Las cartas se dividen en
+                    <strong>Numerador</strong> y
+                    <strong>Denominador</strong>.
+                </p>
+
+                <div class="formula">
+
+                    (Producto del Numerador ÷
+                    Producto del Denominador)
+                    × número de cartas × 2
+
+                </div>
+
+
+                <div class="example">
+
+                    Numerador:
+                    10 × 5 = 50
+
+                    <br>
+
+                    Denominador:
+                    4
+
+                    <br><br>
+
+                    (50 ÷ 4) × 3 × 2 =
+                    <strong>75</strong>
+
+                </div>
+
+            </section>
+
+
+            <section class="rules-section">
+
+                <h3>🔒 Cartas bloqueadas</h3>
+
+                <ul>
+
+                    <li>
+                        La carta más alta va al
+                        <strong>Denominador</strong>.
+                    </li>
+
+                    <li>
+                        La segunda carta más alta va al
+                        <strong>Numerador</strong>.
+                    </li>
+
+                </ul>
+
+                <p>
+                    Estas cartas no pueden moverse manualmente.
+                </p>
+
+            </section>
+
+
+            <section class="rules-section">
+
+                <h3>↔️ Mover cartas</h3>
+
+                <p>
+                    Las cartas que no están bloqueadas pueden moverse
+                    mediante <strong>arrastrar y soltar</strong>.
+                </p>
+
+            </section>
+
+
+            <section class="rules-section">
+
+                <h3>🃏 Pedir carta</h3>
+
+                <p>
+                    Puedes pedir cartas hasta tener un máximo
+                    de <strong>8 cartas</strong>.
+                </p>
+
+            </section>
+
+            <section class="rules-section">
+
+                <h3>🃏 Joker</h3>
+
+                <p>
+                    El Joker tiene un valor base de
+                    <strong>1</strong>.
+                </p>
+
+                <p>
+                    Si consigues los dos Jokers,
+                    ambos pasan a valer <strong>14</strong>,
+                    como un AS.
+                </p>
+
+                <p>
+                    Los Jokers nunca cuentan como la carta
+                    más alta ni como la segunda más alta,
+                    por lo que siempre pueden moverse
+                    libremente.
+                </p>
+
+                <p>
+                    Un Joker recién obtenido puede
+                    <strong>descartarse</strong>.
+                    Después de colocarlo en una fila,
+                    ya no puede descartarse.
+                </p>
+
+            </section>
+
+
+            <section class="rules-section">
+
+                <h3>✋ Plantarse</h3>
+
+                <p>
+                    Pulsa <strong>PLANTARSE</strong> cuando quieras
+                    terminar tu turno.
+                </p>
+
+                <p>
+                    No podrás plantarte mientras tengas cartas
+                    pendientes o estés sobre 25.
+                </p>
+
+            </section>
+
+
+            <section class="rules-section">
+
+                <h3>🤖 Dealer</h3>
+
+                <p>
+                    El Dealer juega automáticamente después de que
+                    te plantes.
+                </p>
+
+                <p>
+                    Su primera carta permanece oculta hasta comenzar
+                    su turno.
+                </p>
+
+                <ul>
+
+                    <li>
+                        <strong>Fácil:</strong>
+                        muchos errores y muchas cartas.
+                    </li>
+
+                    <li>
+                        <strong>Normal:</strong>
+                        generalmente toma buenas decisiones.
+                    </li>
+
+                    <li>
+                        <strong>Difícil:</strong>
+                        busca las mejores combinaciones.
+                    </li>
+
+                </ul>
+
+            </section>
+
+
+            <section class="rules-section">
+
+                <h3>🏆 Resultado</h3>
+
+                <p>
+                    Gana quien consiga la puntuación más alta
+                    sin superar 25.
+                </p>
+
+                <p>
+                    Si ambos terminan con la misma puntuación,
+                    hay empate.
+                </p>
+
+            </section>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==========================================
+     MODAL NUEVA PARTIDA
+========================================== -->
+
+<div
+    id="new-game-modal"
+    class="overlay"
+>
+
+    <div class="confirm-window">
+
+        <h2>
+            ¿Nueva partida?
+        </h2>
+
+        <p>
+            Se perderá el progreso de la partida actual.
+        </p>
+
+
+        <div class="confirm-buttons">
+
+            <button
+                id="cancel-new-game"
+                class="secondary-button"
+            >
+                NO
+            </button>
+
+            <button
+                id="confirm-new-game"
+                class="danger-button"
+            >
+                SÍ
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==========================================
+     RESULTADO
+========================================== -->
+
+<div
+    id="result-modal"
+    class="overlay result-overlay"
+>
+
+    <div class="result-window">
+
+        <div
+            id="result-title"
+            class="result-title"
+        >
+            ¡Perdiste!
+        </div>
+
+
+        <div
+            id="result-subtitle"
+            class="result-subtitle"
+        >
+            El Dealer ganó la partida.
+        </div>
+
+
+        <div class="result-table">
+
+            <div class="result-row result-header">
+
+                <span></span>
+
+                <span>
+                    Puntuación
+                </span>
+
+                <span>
+                    Cartas
+                </span>
+
+                <span>
+                    ≤ 25
+                </span>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <strong>
+                    Dealer
+                </strong>
+
+                <span id="result-dealer-score">
+                    0.00
+                </span>
+
+                <span id="result-dealer-cards">
+                    2/8
+                </span>
+
+                <span id="result-dealer-valid">
+                    Sí
+                </span>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <strong>
+                    Tú
+                </strong>
+
+                <span id="result-player-score">
+                    0.00
+                </span>
+
+                <span id="result-player-cards">
+                    2/8
+                </span>
+
+                <span id="result-player-valid">
+                    Sí
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="result-message-title">
+            El Dealer dice:
+        </div>
+
+
+        <div
+            id="result-taunt"
+            class="result-taunt"
+        >
+            ...
+        </div>
+
+
+        <button
+            id="result-new-game"
+            class="primary-button"
+        >
+            NUEVA PARTIDA
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ==========================================
+     OVERLAY DE CARTA
+========================================== -->
+
+<div
+    id="draw-overlay"
+    class="draw-overlay"
+>
+
+    <div
+        id="draw-tray"
+        class="draw-tray"
+    >
+
+        <div
+            id="draw-tray-title"
+            class="draw-tray-title"
+        >
+            CARTA OBTENIDA
+        </div>
+
+
+        <div
+            id="draw-tray-card"
+            class="draw-tray-card"
+        ></div>
+
+
+        <div
+            id="draw-tray-hint"
+            class="draw-tray-hint"
+        >
+            Toma la carta y arrástrala a una fila.
+        </div>
+
+        <button
+            id="discard-card-button"
+            class="danger-button draw-discard-button hidden"
+        >
+            DESCARTAR JOKER
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ==========================================
+     APLICACIÓN
+========================================== -->
+
+<main class="game">
+
+
+    <!-- TOPBAR -->
+
+
+
+    <!-- ======================================
+         DEALER
+    ======================================= -->
+
+    <section
+        class="game-section dealer-section"
+    >
+
+        <div class="section-header">
+
+            <div class="section-identity">
+
+                <h2>
+                    DEALER
+                </h2>
+
+                <div
+                    id="dealer-message"
+                    class="section-message dealer-message"
+                >
+                    Estoy observando...
+                </div>
+
+            </div>
+
+
+            <div
+                id="difficulty-container"
+                class="difficulty-container"
+            >
+
+                <button
+                    id="difficulty-button"
+                    class="difficulty-button"
+                >
+
+                    <span>
+                        Dificultad:
+                    </span>
+
+                    <strong id="current-difficulty">
+                        Normal
+                    </strong>
+
+                    <span class="difficulty-lock">
+                        🔓
+                    </span>
+
+                </button>
+
+
+                <div
+                    id="difficulty-flyout"
+                    class="difficulty-flyout"
+                >
+
+                    <div
+                        class="difficulty-option"
+                        data-difficulty="easy"
+                    >
+
+                        <strong>
+                            🟢 Fácil
+                        </strong>
+
+                        <span>
+                            Muchos errores y más cartas.
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="difficulty-option selected"
+                        data-difficulty="normal"
+                    >
+
+                        <strong>
+                            🟡 Normal
+                        </strong>
+
+                        <span>
+                            Buenas decisiones con algunos errores.
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="difficulty-option"
+                        data-difficulty="hard"
+                    >
+
+                        <strong>
+                            🔴 Difícil
+                        </strong>
+
+                        <span>
+                            Busca las mejores combinaciones.
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="difficulty-info"
+                        class="difficulty-info"
+                    >
+                        El Dealer organiza bien sus cartas,
+                        pero todavía puede cometer errores.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="board">
+
+            <div class="board-row">
+
+                <div class="row-title">
+                    Numerador
+                </div>
+
+                <div class="cards-wrapper">
+
+                    <div class="locked-label">
+                        2ª MÁS ALTA
+                    </div>
+
+                    <div
+                        id="dealer-numerator"
+                        class="cards"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <div class="board-row">
+
+                <div class="row-title">
+                    Denominador
+                </div>
+
+                <div class="cards-wrapper">
+
+                    <div class="locked-label">
+                        MÁS ALTA
+                    </div>
+
+                    <div
+                        id="dealer-denominator"
+                        class="cards"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="section-footer">
+
+            <span>
+                Cartas:
+                <strong id="dealer-card-count">
+                    2/8
+                </strong>
+            </span>
+
+            <span>
+                Puntuación:
+                <strong id="dealer-score">
+                    Oculto
+                </strong>
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================
+         PLAYER
+    ======================================= -->
+
+    <section
+        class="game-section player-section"
+    >
+
+        <div class="section-header">
+
+            <div class="section-identity">
+
+                <h2>
+                    TU JUGADA
+                </h2>
+
+                <div
+                    id="player-message"
+                    class="section-message player-message"
+                >
+                    Organiza tus cartas y acércate a 25.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="board">
+
+            <div class="board-row">
+
+                <div class="row-title">
+                    Numerador
+                </div>
+
+                <div class="cards-wrapper">
+
+                    <div class="locked-label">
+                        2ª MÁS ALTA
+                    </div>
+
+                    <div
+                        id="numerator"
+                        class="cards drop-zone"
+                        data-row="numerator"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <div class="board-row">
+
+                <div class="row-title">
+                    Denominador
+                </div>
+
+                <div class="cards-wrapper">
+
+                    <div class="locked-label">
+                        MÁS ALTA
+                    </div>
+
+                    <div
+                        id="denominator"
+                        class="cards drop-zone"
+                        data-row="denominator"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="pending-area"
+            class="pending-area hidden"
+        >
+
+            <span>
+                Carta pendiente:
+            </span>
+
+            <div
+                id="pending-card"
+                class="pending-card"
+            ></div>
+
+        </div>
+
+
+        <div class="player-footer">
+
+            <div class="section-footer">
+
+                <span>
+                    Cartas:
+                    <strong id="card-count">
+                        2/8
+                    </strong>
+                </span>
+
+
+                <span>
+                    Puntuación:
+                    <strong id="player-score">
+                        0.00
+                    </strong>
+                </span>
+
+                <span
+                    id="joker-availability"
+                    class="joker-availability"
+                >
+                    Jokers en la baraja:
+                    <strong id="joker-available-count">
+                        2/2
+                    </strong>
+                </span>
+
+            </div>
+
+
+            <div class="buttons">
+
+                <button
+                    id="draw-button"
+                    class="primary-button"
+                >
+                    PEDIR CARTA
+                </button>
+
+                <button
+                    id="stand-button"
+                    class="success-button"
+                >
+                    PLANTARSE
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- NUEVA PARTIDA -->
+
+    <div class="new-game-container">
+
+        <button
+            id="restart-button"
+            class="secondary-button restart"
+        >
+            NUEVA PARTIDA
+        </button>
+
+    </div>
+
+</main>
+
+
+<script src="./public/js/main.js"></script>
+
+</body>
+
+</html>

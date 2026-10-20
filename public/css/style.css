@@ -1,0 +1,3874 @@
+* {
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    overflow: hidden;
+}
+
+
+:root {
+
+    --game-width:
+        min(
+            1180px,
+            calc(100vw - 32px)
+        );
+
+    --game-height:
+        min(
+            820px,
+            calc(100dvh - 64px)
+        );
+
+
+    /* ======================================
+       DIMENSIONES GENERALES
+    ====================================== */
+
+    --section-pad-x:
+        clamp(
+            12px,
+            1.4vw,
+            20px
+        );
+
+    --row-title-width:
+        clamp(
+            78px,
+            8vw,
+            112px
+        );
+
+    --cards-pad-x:
+        10px;
+
+    --card-gap:
+        clamp(
+            4px,
+            0.55vw,
+            8px
+        );
+
+
+    /*
+     * TAMAÑO BASE DE CARTA
+     *
+     * La referencia principal es la ALTURA
+     * disponible de la pantalla.
+     *
+     * La carta NO se hace más pequeña por
+     * altura salvo que realmente no exista
+     * espacio vertical suficiente para ella.
+     */
+    --card-width-height:
+        clamp(
+            42px,
+            8.8dvh,
+            68px
+        );
+
+
+    /*
+     * Ancho disponible real para 8 cartas.
+     *
+     * Se descuenta:
+     * - ancho del juego
+     * - borde
+     * - padding
+     * - título de fila
+     * - padding de cartas
+     * - 7 espacios
+     */
+    --card-width-space:
+        calc(
+            (
+                var(--game-width)
+                - 2px
+                - (2 * var(--section-pad-x))
+                - var(--row-title-width)
+                - (2 * var(--cards-pad-x))
+                - (7 * var(--card-gap))
+            )
+            / 8
+        );
+
+
+    /*
+     * LA CARTA SOLO PUEDE REDUCIRSE POR ANCHO.
+     *
+     * Si el ancho disponible alcanza,
+     * mantiene el tamaño calculado por altura.
+     *
+     * Si no alcanza, reduce su ancho.
+     */
+    --card-width:
+        min(
+            var(--card-width-height),
+            var(--card-width-space)
+        );
+
+
+    /*
+     * La altura SIEMPRE conserva la proporción
+     * de una carta.
+     */
+    --card-height:
+        calc(
+            var(--card-width) * 1.38
+        );
+
+
+    /*
+     * El texto depende directamente del tamaño
+     * real de la carta y no del viewport.
+     */
+    --card-font-size:
+        clamp(
+            10px,
+            calc(var(--card-width) * 0.36),
+            21px
+        );
+
+
+    --card-radius:
+        clamp(
+            5px,
+            calc(var(--card-width) * 0.11),
+            8px
+        );
+
+
+    --panel:
+        #1b2637;
+
+    --panel-dark:
+        #101827;
+
+    --border:
+        #2d3a4d;
+
+    --muted:
+        #8e98a7;
+
+    --yellow:
+        #facc15;
+
+    --blue:
+        #2563eb;
+
+    --green:
+        #16a34a;
+
+}
+
+
+/* ==========================================
+   BODY
+========================================== */
+
+body {
+
+    background:
+        #080d15;
+
+    color:
+        #f3f4f6;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        flex-start;
+
+    align-items:
+        center;
+
+    gap:
+        clamp(
+            5px,
+            1vh,
+            10px
+        );
+
+    padding:
+        clamp(
+            7px,
+            1.5vh,
+            14px
+        )
+        0;
+
+}
+
+
+/* ==========================================
+   TÍTULO
+========================================== */
+
+.page-title {
+
+    flex:
+        0 0 auto;
+
+    margin:
+        0;
+
+    width:
+        100%;
+
+    text-align:
+        center;
+
+    color:
+        #f3f4f6;
+
+    font-size:
+        clamp(
+            19px,
+            2.4vw,
+            30px
+        );
+
+    line-height:
+        1.05;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        clamp(
+            1px,
+            0.18vw,
+            2.5px
+        );
+
+    text-shadow:
+        0 3px 12px
+        rgba(0,0,0,0.35);
+
+}
+
+
+/* ==========================================
+   REGLAS
+========================================== */
+
+.rules-button {
+
+    position:
+        fixed;
+
+    top:
+        clamp(
+            7px,
+            1.5vh,
+            14px
+        );
+
+    right:
+        clamp(
+            7px,
+            1vw,
+            16px
+        );
+
+    width:
+        42px;
+
+    height:
+        42px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        8px;
+
+    background:
+        #121a26;
+
+    color:
+        #e5e7eb;
+
+    font-size:
+        19px;
+
+    cursor:
+        pointer;
+
+    z-index:
+        3000;
+
+    transition:
+        transform 0.15s,
+        background 0.15s;
+
+}
+
+
+.rules-button:hover {
+
+    background:
+        #202c3d;
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+/* ==========================================
+   GAME
+========================================== */
+
+.game {
+
+    width:
+        var(--game-width);
+
+    height:
+        var(--game-height);
+
+    min-height:
+        min(
+            430px,
+            calc(100dvh - 64px)
+        );
+
+    background:
+        var(--panel);
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        10px;
+
+    overflow:
+        hidden;
+
+    display:
+        grid;
+
+    grid-template-rows:
+        minmax(0, 1fr)
+        minmax(0, 1fr)
+        40px;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0,0,0,0.4);
+
+}
+
+
+
+/* ==========================================
+   GAME SECTION
+========================================== */
+
+.game-section {
+
+    min-height:
+        0;
+
+    padding:
+        clamp(
+            9px,
+            1.25vh,
+            18px
+        )
+        var(--section-pad-x);
+
+    display:
+        grid;
+
+    grid-template-rows:
+        auto
+        minmax(0, 1fr)
+        auto;
+
+    gap:
+        clamp(
+            5px,
+            0.8vh,
+            10px
+        );
+
+    overflow:
+        hidden;
+
+}
+
+
+.player-section {
+
+    border-top:
+        1px solid
+        rgba(255,255,255,0.035);
+
+}
+
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.section-header {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        16px;
+
+    min-height:
+        31px;
+
+}
+
+
+.section-identity {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        clamp(
+            8px,
+            1vw,
+            14px
+        );
+
+}
+
+
+.section-identity h2 {
+
+    margin:
+        0;
+
+    flex:
+        0 0 auto;
+
+    font-size:
+        clamp(
+            13px,
+            1.25vw,
+            18px
+        );
+
+    letter-spacing:
+        0.8px;
+
+}
+
+
+.section-message {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+    font-size:
+        clamp(
+            11px,
+            0.95vw,
+            14px
+        );
+
+}
+
+
+.dealer-message {
+
+    color:
+        #cbd5e1;
+
+}
+
+
+.player-message {
+
+    color:
+        #d1d5db;
+
+}
+
+
+/* ==========================================
+   DIFFICULTY
+========================================== */
+
+.difficulty-container {
+
+    position:
+        relative;
+
+    flex:
+        0 0 auto;
+
+}
+
+
+.difficulty-button {
+
+    border:
+        1px solid
+        var(--border);
+
+    background:
+        #111a28;
+
+    color:
+        #dbe2ea;
+
+    border-radius:
+        6px;
+
+    padding:
+        7px 10px;
+
+    font-size:
+        clamp(
+            10px,
+            0.85vw,
+            13px
+        );
+
+    cursor:
+        pointer;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.difficulty-button:hover {
+
+    background:
+        #1a2636;
+
+}
+
+
+.difficulty-container.locked
+.difficulty-button {
+
+    opacity:
+        0.55;
+
+    cursor:
+        not-allowed;
+
+}
+
+
+.difficulty-lock {
+
+    margin-left:
+        4px;
+
+    font-size:
+        10px;
+
+}
+
+
+/* ==========================================
+   DIFFICULTY FLYOUT
+========================================== */
+
+.difficulty-flyout {
+
+    position:
+        absolute;
+
+    top:
+        calc(
+            100% + 7px
+        );
+
+    right:
+        0;
+
+    width:
+        min(
+            340px,
+            calc(100vw - 28px)
+        );
+
+    padding:
+        7px;
+
+    background:
+        #101827;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        8px;
+
+    box-shadow:
+        0 18px 40px
+        rgba(0,0,0,0.45);
+
+    opacity:
+        0;
+
+    visibility:
+        hidden;
+
+    pointer-events:
+        none;
+
+    transform:
+        translateY(-5px);
+
+    transition:
+        opacity 0.15s,
+        transform 0.15s,
+        visibility 0.15s;
+
+    z-index:
+        800;
+
+}
+
+
+.difficulty-flyout.open {
+
+    opacity:
+        1;
+
+    visibility:
+        visible;
+
+    pointer-events:
+        auto;
+
+    transform:
+        translateY(0);
+
+}
+
+
+.difficulty-option {
+
+    padding:
+        10px;
+
+    border-radius:
+        6px;
+
+    cursor:
+        pointer;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        4px;
+
+}
+
+
+.difficulty-option:hover {
+
+    background:
+        #1c2838;
+
+}
+
+
+.difficulty-option.selected {
+
+    background:
+        #243246;
+
+}
+
+
+.difficulty-option strong {
+
+    font-size:
+        12px;
+
+}
+
+
+.difficulty-option span {
+
+    font-size:
+        10px;
+
+    line-height:
+        1.35;
+
+    color:
+        var(--muted);
+
+}
+
+
+.difficulty-info {
+
+    margin-top:
+        6px;
+
+    padding:
+        9px;
+
+    background:
+        #0d1521;
+
+    border-radius:
+        6px;
+
+    color:
+        #aeb8c5;
+
+    font-size:
+        10px;
+
+    line-height:
+        1.4;
+
+}
+
+
+/* ==========================================
+   BOARD
+========================================== */
+
+.board {
+
+    min-height:
+        0;
+
+    display:
+        grid;
+
+    grid-template-rows:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        clamp(
+            5px,
+            0.7vh,
+            8px
+        );
+
+}
+
+
+.board-row {
+
+    min-height:
+        0;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        var(--row-title-width)
+        minmax(
+            0,
+            1fr
+        );
+
+    background:
+        #101827;
+
+    border:
+        1px solid
+        #1d2939;
+
+    border-radius:
+        6px;
+
+    overflow:
+        hidden;
+
+}
+
+
+/* ==========================================
+   ROW TITLE
+========================================== */
+
+.row-title {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    color:
+        #8e99a8;
+
+    font-size:
+        clamp(
+            10px,
+            0.9vw,
+            14px
+        );
+
+    font-weight:
+        600;
+
+    text-transform:
+        uppercase;
+
+    padding:
+        0 4px;
+
+}
+
+
+/* ==========================================
+   CARTAS WRAPPER
+========================================== */
+
+.cards-wrapper {
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    position:
+        relative;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    overflow:
+        hidden;
+
+    padding:
+        19px
+        var(--cards-pad-x)
+        6px
+        var(--cards-pad-x);
+
+}
+
+
+/* ==========================================
+   LOCKED LABEL
+========================================== */
+
+.locked-label {
+
+    position:
+        absolute;
+
+    top:
+        2px;
+
+    left:
+        var(--cards-pad-x);
+
+    width:
+        var(--card-width);
+
+    text-align:
+        center;
+
+    color:
+        var(--yellow);
+
+    font-size:
+        clamp(
+            8px,
+            0.62vw,
+            10px
+        );
+
+    font-weight:
+        700;
+
+    line-height:
+        1;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* ==========================================
+   GAME CARDS
+========================================== */
+
+.cards {
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-wrap:
+        nowrap;
+
+    align-items:
+        center;
+
+    gap:
+        var(--card-gap);
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * Todas las cartas usan exactamente las
+ * mismas dimensiones calculadas.
+ */
+.card {
+
+    flex:
+        0 0
+        var(--card-width);
+
+    width:
+        var(--card-width);
+
+    height:
+        var(--card-height);
+
+    min-width:
+        0;
+
+    border-radius:
+        var(--card-radius);
+
+    background:
+        #f9fafb;
+
+    color:
+        #101827;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    /*
+     * El texto se basa en la dimensión real
+     * de la carta.
+     */
+    font-size:
+        var(--card-font-size);
+
+    line-height:
+        1;
+
+    font-weight:
+        700;
+
+    user-select:
+        none;
+
+    white-space:
+        nowrap;
+
+    overflow:
+        hidden;
+
+    box-shadow:
+        0 3px 8px
+        rgba(0,0,0,0.22);
+
+    transition:
+        transform 0.15s,
+        box-shadow 0.15s;
+
+}
+
+
+.card.red {
+
+    color:
+        #dc2626;
+
+}
+
+
+.card.draggable {
+
+    cursor:
+        grab;
+
+}
+
+
+.card.draggable:hover {
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 8px 14px
+        rgba(0,0,0,0.3);
+
+}
+
+
+.card.locked {
+
+    border:
+        2px solid
+        var(--yellow);
+
+    box-shadow:
+        0 0 0 1px
+        rgba(250,204,21,0.15),
+        0 0 10px
+        rgba(250,204,21,0.12);
+
+}
+
+
+.card.hidden-card {
+
+    background:
+        #273449;
+
+    color:
+        var(--yellow);
+
+    border:
+        1px solid
+        #405067;
+
+    font-size:
+        clamp(
+            15px,
+            calc(var(--card-width) * 0.45),
+            30px
+        );
+
+}
+
+/* ==========================================
+   JOKER
+========================================== */
+
+.card.joker {
+
+    position:
+        relative;
+
+    background:
+        #f9fafb;
+
+    color:
+        #111827;
+
+    border:
+        2px solid
+        #111827;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * Texto vertical de las esquinas.
+ */
+.joker-corner {
+
+    position:
+        absolute;
+
+    writing-mode:
+        vertical-rl;
+
+    text-orientation:
+        upright;
+
+    font-size:
+        clamp(
+            6px,
+            calc(var(--card-width) * 0.15),
+            10px
+        );
+
+    font-weight:
+        800;
+
+    line-height:
+        1;
+
+    letter-spacing:
+        0.5px;
+
+}
+
+
+/*
+ * Esquina superior izquierda.
+ */
+.joker-corner-top {
+
+    top:
+        4px;
+
+    left:
+        4px;
+
+}
+
+
+/*
+ * Esquina inferior derecha.
+ *
+ * Rotamos el texto para que ascienda
+ * desde abajo hacia arriba.
+ */
+.joker-corner-bottom {
+
+    right:
+        4px;
+
+    bottom:
+        4px;
+
+    transform:
+        rotate(
+            180deg
+        );
+
+}
+
+
+/*
+ * Letra central del Joker.
+ */
+.joker-center {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    font-size:
+        clamp(
+            16px,
+            calc(var(--card-width) * 0.42),
+            28px
+        );
+
+    font-weight:
+        900;
+
+    line-height:
+        1;
+
+}
+
+.rules-card.joker-card {
+
+    position:
+        relative;
+
+    color:
+        #111827;
+
+    border:
+        2px solid
+        #111827;
+
+}
+
+
+.rules-joker-top,
+.rules-joker-bottom {
+
+    position:
+        absolute;
+
+    writing-mode:
+        vertical-rl;
+
+    text-orientation:
+        upright;
+
+    font-size:
+        6px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1;
+
+}
+
+
+.rules-joker-top {
+
+    top:
+        3px;
+
+    left:
+        3px;
+
+}
+
+
+.rules-joker-bottom {
+
+    right:
+        3px;
+
+    bottom:
+        3px;
+
+    transform:
+        rotate(
+            180deg
+        );
+
+}
+
+
+.rules-card.joker-card strong {
+
+    font-size:
+        18px;
+
+}
+
+/* ==========================================
+   DRAW OVERLAY
+========================================== */
+
+.draw-overlay {
+
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    pointer-events:
+        none;
+
+    z-index:
+        1500;
+
+}
+
+
+.draw-overlay.open {
+
+    pointer-events:
+        none;
+
+}
+
+
+.draw-tray {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    bottom:
+        0;
+
+    width:
+        min(
+            420px,
+            calc(100vw - 24px)
+        );
+
+    min-height:
+        clamp(
+            150px,
+            24vh,
+            190px
+        );
+
+    padding:
+        15px;
+
+    background:
+        #172334;
+
+    border:
+        1px solid
+        #35465c;
+
+    border-bottom:
+        none;
+
+    border-radius:
+        14px
+        14px
+        0
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    box-shadow:
+        0 -14px 40px
+        rgba(0,0,0,0.35);
+
+    transform:
+        translate(
+            -50%,
+            110%
+        );
+
+    transition:
+        transform 0.28s
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        );
+
+    pointer-events:
+        auto;
+
+}
+
+
+.draw-overlay.open
+.draw-tray {
+
+    transform:
+        translate(
+            -50%,
+            0
+        );
+
+}
+
+
+.draw-overlay.dragging
+.draw-tray {
+
+    transform:
+        translate(
+            -50%,
+            110%
+        );
+
+}
+
+
+.draw-tray.success {
+
+    min-height:
+        110px;
+
+}
+
+
+.draw-tray-title {
+
+    color:
+        #dce4ed;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        1px;
+
+}
+
+
+.draw-tray-card {
+
+    margin-top:
+        8px;
+
+    min-height:
+        88px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+}
+
+
+/*
+ * Usa EXACTAMENTE el mismo tamaño
+ * de carta del tablero.
+ */
+.draw-tray-card .card {
+
+    width:
+        var(--card-width);
+
+    height:
+        var(--card-height);
+
+    flex:
+        0 0
+        var(--card-width);
+
+    font-size:
+        var(--card-font-size);
+
+    border-radius:
+        var(--card-radius);
+
+    cursor:
+        grab;
+
+    touch-action:
+        none;
+
+}
+
+
+.draw-tray-card .card:active {
+
+    cursor:
+        grabbing;
+
+}
+
+
+.draw-tray-hint {
+
+    margin-top:
+        7px;
+
+    color:
+        #8c98a8;
+
+    font-size:
+        10px;
+
+    line-height:
+        1.35;
+
+    text-align:
+        center;
+
+}
+
+/* ==========================================
+   JOKER
+========================================== */
+
+.joker-card {
+
+    color:
+        #111827;
+
+    border:
+        2px solid
+        #111827;
+
+    background:
+        #f9fafb;
+
+}
+
+.joker-availability {
+
+    padding:
+        9px 12px;
+
+    border-radius:
+        6px;
+
+    color:
+        #aeb8c5;
+
+    text-align:
+        center;
+
+}
+
+
+.joker-availability strong {
+
+    color:
+        var(--yellow);
+
+}
+
+.draw-discard-button {
+
+    margin-top:
+        9px;
+
+    padding:
+        7px 12px;
+
+    font-size:
+        10px;
+
+}
+
+
+.draw-discard-button.hidden {
+
+    display:
+        none !important;
+
+}
+
+
+/* ==========================================
+   FLOATING CARD
+========================================== */
+
+.draw-floating-card {
+
+    position:
+        fixed;
+
+    width:
+        var(--card-width);
+
+    height:
+        var(--card-height);
+
+    border-radius:
+        var(--card-radius);
+
+    background:
+        #ffffff;
+
+    color:
+        #101827;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-size:
+        var(--card-font-size);
+
+    font-weight:
+        700;
+
+    line-height:
+        1;
+
+    white-space:
+        nowrap;
+
+    box-shadow:
+        0 16px 35px
+        rgba(0,0,0,0.38);
+
+    pointer-events:
+        none;
+
+    z-index:
+        2500;
+
+}
+
+
+.draw-floating-card.red {
+
+    color:
+        #dc2626;
+
+}
+
+
+/* ==========================================
+   DROP ZONE
+========================================== */
+
+.drop-zone.drag-over {
+
+    outline:
+        2px dashed
+        var(--yellow);
+
+    outline-offset:
+        2px;
+
+    border-radius:
+        4px;
+
+}
+
+
+/* ==========================================
+   PENDING
+========================================== */
+
+.pending-area {
+
+    min-height:
+        32px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        10px;
+
+    padding:
+        4px 8px;
+
+    background:
+        #101827;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        5px;
+
+    font-size:
+        11px;
+
+    color:
+        var(--muted);
+
+}
+
+
+.pending-card {
+
+    display:
+        flex;
+
+    gap:
+        4px;
+
+}
+
+
+.pending-card .card {
+
+    width:
+        clamp(
+            26px,
+            calc(var(--card-width) * 0.62),
+            32px
+        );
+
+    height:
+        calc(
+            clamp(
+                26px,
+                calc(var(--card-width) * 0.62),
+                32px
+            ) * 1.38
+        );
+
+    flex-basis:
+        clamp(
+            26px,
+            calc(var(--card-width) * 0.62),
+            32px
+        );
+
+    font-size:
+        clamp(
+            9px,
+            calc(var(--card-width) * 0.22),
+            11px
+        );
+
+}
+
+
+.hidden {
+
+    display:
+        none !important;
+
+}
+
+
+/* ==========================================
+   FOOTER
+========================================== */
+
+.section-footer {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        clamp(
+            12px,
+            2vw,
+            24px
+        );
+
+    color:
+        #8d99a8;
+
+    font-size:
+        clamp(
+            11px,
+            0.95vw,
+            14px
+        );
+
+}
+
+
+.section-footer strong {
+
+    color:
+        var(--yellow);
+
+    font-size:
+        1.05em;
+
+}
+
+
+/* ==========================================
+   PLAYER FOOTER
+========================================== */
+
+.player-footer {
+
+    min-width:
+        0;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr auto;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+}
+
+
+/* ==========================================
+   BOTONES
+========================================== */
+
+.buttons {
+
+    display:
+        flex;
+
+    gap:
+        7px;
+
+}
+
+
+button {
+
+    font-family:
+        inherit;
+
+}
+
+
+.primary-button,
+.success-button,
+.secondary-button,
+.danger-button {
+
+    border:
+        none;
+
+    border-radius:
+        6px;
+
+    padding:
+        8px 13px;
+
+    font-size:
+        clamp(
+            10px,
+            0.8vw,
+            12px
+        );
+
+    font-weight:
+        700;
+
+    cursor:
+        pointer;
+
+}
+
+
+.primary-button {
+
+    background:
+        var(--blue);
+
+    color:
+        white;
+
+}
+
+
+.success-button {
+
+    background:
+        var(--green);
+
+    color:
+        white;
+
+}
+
+
+.secondary-button {
+
+    background:
+        #374151;
+
+    color:
+        white;
+
+}
+
+
+.danger-button {
+
+    background:
+        #dc2626;
+
+    color:
+        white;
+
+}
+
+
+.primary-button:hover:not(:disabled) {
+
+    background:
+        #1d4ed8;
+
+}
+
+
+.success-button:hover:not(:disabled) {
+
+    background:
+        #15803d;
+
+}
+
+
+.secondary-button:hover {
+
+    background:
+        #4b5563;
+
+}
+
+
+.danger-button:hover {
+
+    background:
+        #b91c1c;
+
+}
+
+
+button:disabled {
+
+    opacity:
+        0.38;
+
+    cursor:
+        not-allowed;
+
+}
+
+
+/* ==========================================
+   NEW GAME
+========================================== */
+
+.new-game-container {
+
+    display:
+        flex;
+
+    justify-content:
+        flex-end;
+
+    align-items:
+        center;
+
+    padding:
+        0 12px;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,0.03);
+
+}
+
+
+.restart {
+
+    padding:
+        7px 12px;
+
+}
+
+
+/* ==========================================
+   OVERLAYS
+========================================== */
+
+.overlay {
+
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    background:
+        rgba(3,7,12,0.76);
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    padding:
+        18px;
+
+    opacity:
+        0;
+
+    visibility:
+        hidden;
+
+    pointer-events:
+        none;
+
+    transition:
+        opacity 0.18s;
+
+    z-index:
+        2000;
+
+}
+
+
+.overlay.open {
+
+    opacity:
+        1;
+
+    visibility:
+        visible;
+
+    pointer-events:
+        auto;
+
+}
+
+
+/* ==========================================
+   RULES WINDOW
+========================================== */
+
+.rules-window {
+
+    width:
+        min(
+            820px,
+            100%
+        );
+
+    max-height:
+        min(
+            88dvh,
+            760px
+        );
+
+    background:
+        #1b2637;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        8px;
+
+    overflow:
+        hidden;
+
+    display:
+        grid;
+
+    grid-template-rows:
+        auto
+        minmax(
+            0,
+            1fr
+        );
+
+}
+
+
+.modal-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    padding:
+        12px 16px;
+
+    background:
+        #111a27;
+
+    border-bottom:
+        1px solid
+        var(--border);
+
+}
+
+
+.modal-header h2 {
+
+    margin:
+        0;
+
+    font-size:
+        clamp(
+            13px,
+            1.05vw,
+            17px
+        );
+
+}
+
+
+.close-button {
+
+    width:
+        32px;
+
+    height:
+        32px;
+
+    border:
+        none;
+
+    border-radius:
+        5px;
+
+    background:
+        #334155;
+
+    color:
+        white;
+
+    cursor:
+        pointer;
+
+}
+
+
+.rules-content {
+
+    overflow-y:
+        auto;
+
+    padding:
+        18px;
+
+}
+
+
+.rules-section {
+
+    margin-bottom:
+        24px;
+
+}
+
+
+.rules-section h3 {
+
+    margin:
+        0 0 8px;
+
+    color:
+        var(--yellow);
+
+    font-size:
+        15px;
+
+}
+
+
+.rules-section p,
+.rules-section li {
+
+    color:
+        #cbd5e1;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.55;
+
+}
+
+
+.rules-section ul {
+
+    padding-left:
+        20px;
+
+}
+
+
+.rules-deck {
+
+    margin-top:
+        12px;
+
+}
+
+
+.rules-suit-title {
+
+    margin:
+        12px 0 8px;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+}
+
+
+.red-suit {
+
+    color:
+        #ef4444;
+
+}
+
+
+.black-suit {
+
+    color:
+        #e5e7eb;
+
+}
+
+
+.rules-cards {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            13,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        4px;
+
+}
+
+
+.rules-card {
+
+    min-height:
+        52px;
+
+    border-radius:
+        5px;
+
+    background:
+        white;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    gap:
+        2px;
+
+}
+
+
+.rules-card strong {
+
+    font-size:
+        12px;
+
+}
+
+
+.rules-card span {
+
+    font-size:
+        8px;
+
+    color:
+        #6b7280;
+
+}
+
+
+.red-card {
+
+    color:
+        #dc2626;
+
+}
+
+
+.black-card {
+
+    color:
+        #111827;
+
+}
+
+
+.deck-note {
+
+    color:
+        #7f8b99 !important;
+
+    font-size:
+        11px !important;
+
+}
+
+
+.formula {
+
+    padding:
+        12px;
+
+    background:
+        #101827;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        5px;
+
+    text-align:
+        center;
+
+    color:
+        var(--yellow);
+
+    font-size:
+        13px;
+
+    font-weight:
+        700;
+
+}
+
+
+.example {
+
+    margin-top:
+        8px;
+
+    padding:
+        10px;
+
+    background:
+        #101827;
+
+    border-radius:
+        5px;
+
+    color:
+        #cbd5e1;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+
+}
+
+
+/* ==========================================
+   CONFIRM
+========================================== */
+
+.confirm-window {
+
+    width:
+        min(
+            380px,
+            calc(100vw - 32px)
+        );
+
+    background:
+        #1b2637;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        8px;
+
+    padding:
+        24px;
+
+    text-align:
+        center;
+
+}
+
+
+.confirm-window h2 {
+
+    margin:
+        0 0 8px;
+
+}
+
+
+.confirm-window p {
+
+    margin:
+        0;
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+}
+
+
+.confirm-buttons {
+
+    margin-top:
+        19px;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    gap:
+        8px;
+
+}
+
+
+/* ==========================================
+   RESULTADO
+========================================== */
+
+.result-overlay {
+
+    background:
+        rgba(3,7,12,0.84);
+
+}
+
+
+.result-window {
+
+    width:
+        min(
+            700px,
+            calc(100vw - 24px)
+        );
+
+    max-height:
+        calc(100dvh - 24px);
+
+    overflow-y:
+        auto;
+
+    background:
+        #1b2637;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        12px;
+
+    padding:
+        34px;
+
+    box-shadow:
+        0 25px 80px
+        rgba(0,0,0,0.55);
+
+    text-align:
+        center;
+
+}
+
+
+.result-title {
+
+    font-size:
+        clamp(
+            32px,
+            4vw,
+            42px
+        );
+
+    font-weight:
+        800;
+
+    line-height:
+        1.15;
+
+}
+
+
+.result-subtitle {
+
+    margin-top:
+        9px;
+
+    color:
+        #c1cad5;
+
+    font-size:
+        clamp(
+            15px,
+            1.4vw,
+            18px
+        );
+
+    line-height:
+        1.4;
+
+}
+
+
+.result-table {
+
+    margin-top:
+        26px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        8px;
+
+    overflow:
+        hidden;
+
+}
+
+
+.result-row {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1.4fr
+        1fr
+        1fr
+        0.8fr;
+
+    min-height:
+        50px;
+
+    align-items:
+        center;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,0.05);
+
+}
+
+
+.result-row:first-child {
+
+    border-top:
+        none;
+
+}
+
+
+.result-row span,
+.result-row strong {
+
+    padding:
+        10px 8px;
+
+    font-size:
+        clamp(
+            14px,
+            1.1vw,
+            16px
+        );
+
+    line-height:
+        1.3;
+
+}
+
+
+.result-row strong {
+
+    font-weight:
+        700;
+
+}
+
+
+.result-header {
+
+    min-height:
+        44px;
+
+    background:
+        #101827;
+
+    color:
+        #aeb8c5;
+
+}
+
+
+.result-header span {
+
+    font-size:
+        clamp(
+            12px,
+            1vw,
+            14px
+        );
+
+    font-weight:
+        700;
+
+}
+
+
+.result-message-title {
+
+    margin-top:
+        26px;
+
+    font-size:
+        clamp(
+            13px,
+            1vw,
+            15px
+        );
+
+    font-weight:
+        700;
+
+    text-transform:
+        uppercase;
+
+    color:
+        #9ba7b5;
+
+    letter-spacing:
+        0.5px;
+
+}
+
+
+.result-taunt {
+
+    margin-top:
+        9px;
+
+    padding:
+        16px;
+
+    background:
+        #101827;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        8px;
+
+    color:
+        #e1e7ee;
+
+    font-size:
+        clamp(
+            14px,
+            1.1vw,
+            16px
+        );
+
+    line-height:
+        1.6;
+
+}
+
+
+#result-new-game {
+
+    margin-top:
+        24px;
+
+    padding:
+        11px 20px;
+
+    font-size:
+        clamp(
+            12px,
+            0.95vw,
+            14px
+        );
+
+}
+
+
+/* ==========================================
+   PANTALLAS BAJAS
+========================================== */
+
+@media (max-height: 650px) {
+
+    :root {
+
+        /*
+         * En pantallas bajas el tamaño sigue
+         * dependiendo de la altura.
+         *
+         * No se impone una reducción adicional
+         * por ancho.
+         */
+        --card-width-height:
+            clamp(
+                34px,
+                8.4dvh,
+                58px
+            );
+
+    }
+
+
+    body {
+
+        padding-top:
+            5px;
+
+        gap:
+            4px;
+
+    }
+
+
+    .page-title {
+
+        font-size:
+            clamp(
+                18px,
+                2.8vw,
+                24px
+            );
+
+    }
+
+
+    .game {
+
+        grid-template-rows:
+            30px
+            minmax(0,1fr)
+            minmax(0,1fr)
+            36px;
+
+        min-height:
+            min(
+                410px,
+                calc(100dvh - 45px)
+            );
+
+    }
+
+
+    .game-section {
+
+        padding:
+            6px var(--section-pad-x);
+
+        gap:
+            4px;
+
+    }
+
+
+    .board {
+
+        gap:
+            4px;
+
+    }
+
+
+    .cards-wrapper {
+
+        padding-top:
+            15px;
+
+    }
+
+
+    .section-header {
+
+        min-height:
+            24px;
+
+    }
+
+
+    .section-identity h2 {
+
+        font-size:
+            clamp(
+                12px,
+                1.3vw,
+                16px
+            );
+
+    }
+
+
+    .section-message {
+
+        font-size:
+            11px;
+
+    }
+
+
+    .section-footer {
+
+        font-size:
+            10px;
+
+    }
+
+
+    .primary-button,
+    .success-button,
+    .secondary-button {
+
+        padding:
+            6px 9px;
+
+        font-size:
+            10px;
+
+    }
+
+
+    .draw-tray {
+
+        min-height:
+            clamp(
+                140px,
+                27vh,
+                165px
+            );
+
+    }
+
+}
+
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 700px) {
+
+    :root {
+
+        --game-width:
+            calc(100vw - 12px);
+
+        --game-height:
+            calc(100dvh - 54px);
+
+        --section-pad-x:
+            8px;
+
+        --row-title-width:
+            52px;
+
+        --cards-pad-x:
+            4px;
+
+        --card-gap:
+            3px;
+
+
+        /*
+         * Sigue mandando la altura.
+         * El ancho solo limita si no caben
+         * las cartas horizontalmente.
+         */
+        --card-width-height:
+            clamp(
+                34px,
+                8.8dvh,
+                56px
+            );
+
+
+        --card-width-space:
+            calc(
+                (
+                    var(--game-width)
+                    - 2px
+                    - (2 * var(--section-pad-x))
+                    - var(--row-title-width)
+                    - (2 * var(--cards-pad-x))
+                    - (7 * var(--card-gap))
+                )
+                / 8
+            );
+
+
+        --card-width:
+            min(
+                var(--card-width-height),
+                var(--card-width-space)
+            );
+
+
+        --card-height:
+            calc(
+                var(--card-width) * 1.38
+            );
+
+
+        --card-font-size:
+            clamp(
+                9px,
+                calc(var(--card-width) * 0.36),
+                18px
+            );
+
+
+        --card-radius:
+            clamp(
+                4px,
+                calc(var(--card-width) * 0.11),
+                7px
+            );
+
+    }
+
+
+    .page-title {
+
+        font-size:
+            clamp(
+                18px,
+                5.2vw,
+                25px
+            );
+
+    }
+
+
+    .game {
+
+        border-radius:
+            7px;
+
+        grid-template-rows:
+            minmax(0,1fr)
+            minmax(0,1fr)
+            38px;
+    }
+
+    .section-header {
+
+        gap:
+            6px;
+
+    }
+
+
+    .section-identity {
+
+        gap:
+            6px;
+
+    }
+
+
+    .section-identity h2 {
+
+        font-size:
+            12px;
+
+    }
+
+
+    .section-message {
+
+        font-size:
+            10px;
+
+    }
+
+
+    .difficulty-button {
+
+        padding:
+            6px 7px;
+
+        font-size:
+            9px;
+
+    }
+
+
+    .difficulty-info {
+
+        font-size:
+            9px;
+
+    }
+
+
+    .row-title {
+
+        font-size:
+            9px;
+
+    }
+
+
+    .cards-wrapper {
+
+        padding:
+            16px var(--cards-pad-x) 4px;
+
+    }
+
+
+    .locked-label {
+
+        left:
+            var(--cards-pad-x);
+
+        font-size:
+            7px;
+
+    }
+
+
+    .card {
+
+        font-size:
+            var(--card-font-size);
+
+    }
+
+
+    .section-footer {
+
+        font-size:
+            10px;
+
+        gap:
+            10px;
+
+    }
+
+
+    .buttons {
+
+        gap:
+            4px;
+
+    }
+
+
+    .primary-button,
+    .success-button {
+
+        padding:
+            7px 8px;
+
+        font-size:
+            9px;
+
+    }
+
+
+    .new-game-container {
+
+        padding:
+            0 7px;
+
+    }
+
+
+    .restart {
+
+        font-size:
+            9px;
+
+        padding:
+            6px 9px;
+
+    }
+
+
+    .rules-button {
+
+        top:
+            6px;
+
+        right:
+            6px;
+
+        width:
+            35px;
+
+        height:
+            35px;
+
+        font-size:
+            15px;
+
+    }
+
+
+    .rules-content {
+
+        padding:
+            12px;
+
+    }
+
+
+    .rules-cards {
+
+        grid-template-columns:
+            repeat(
+                7,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+    }
+
+
+    .rules-card {
+
+        min-height:
+            44px;
+
+    }
+
+
+    .rules-card strong {
+
+        font-size:
+            10px;
+
+    }
+
+
+    .rules-card span {
+
+        font-size:
+            7px;
+
+    }
+
+
+    .draw-tray {
+
+        width:
+            calc(100vw - 16px);
+
+        min-height:
+            clamp(
+                150px,
+                28vh,
+                175px
+            );
+
+    }
+
+
+    .draw-tray-card .card {
+
+        width:
+            var(--card-width);
+
+        height:
+            var(--card-height);
+
+        flex-basis:
+            var(--card-width);
+
+        font-size:
+            var(--card-font-size);
+
+    }
+
+
+    .result-window {
+
+        width:
+            calc(100vw - 18px);
+
+        max-height:
+            calc(100dvh - 14px);
+
+        padding:
+            26px 16px;
+
+        border-radius:
+            10px;
+
+    }
+
+
+    .result-title {
+
+        font-size:
+            clamp(
+                28px,
+                9vw,
+                36px
+            );
+
+    }
+
+
+    .result-subtitle {
+
+        font-size:
+            13px;
+
+        line-height:
+            1.4;
+
+    }
+
+
+    .result-table {
+
+        margin-top:
+            20px;
+
+    }
+
+
+    .result-row {
+
+        min-height:
+            43px;
+
+    }
+
+
+    .result-row span,
+    .result-row strong {
+
+        padding:
+            8px 5px;
+
+        font-size:
+            12px;
+
+    }
+
+
+    .result-header {
+
+        min-height:
+            39px;
+
+    }
+
+
+    .result-header span {
+
+        font-size:
+            10px;
+
+    }
+
+
+    .result-message-title {
+
+        margin-top:
+            20px;
+
+        font-size:
+            11px;
+
+    }
+
+
+    .result-taunt {
+
+        padding:
+            13px;
+
+        font-size:
+            12px;
+
+        line-height:
+            1.5;
+
+    }
+
+
+    #result-new-game {
+
+        margin-top:
+            19px;
+
+        padding:
+            9px 15px;
+
+        font-size:
+            11px;
+
+    }
+
+}
+
+
+/* ==========================================
+   MOBILE MUY ESTRECHO
+========================================== */
+
+@media (max-width: 380px) {
+
+    :root {
+
+        --section-pad-x:
+            6px;
+
+        --row-title-width:
+            46px;
+
+        --cards-pad-x:
+            3px;
+
+        --card-gap:
+            2px;
+
+
+        --card-width-height:
+            clamp(
+                32px,
+                8.8dvh,
+                52px
+            );
+
+
+        --card-width-space:
+            calc(
+                (
+                    var(--game-width)
+                    - 2px
+                    - (2 * var(--section-pad-x))
+                    - var(--row-title-width)
+                    - (2 * var(--cards-pad-x))
+                    - (7 * var(--card-gap))
+                )
+                / 8
+            );
+
+
+        --card-width:
+            min(
+                var(--card-width-height),
+                var(--card-width-space)
+            );
+
+
+        --card-height:
+            calc(
+                var(--card-width) * 1.38
+            );
+
+
+        --card-font-size:
+            clamp(
+                9px,
+                calc(var(--card-width) * 0.36),
+                16px
+            );
+
+
+        --card-radius:
+            clamp(
+                4px,
+                calc(var(--card-width) * 0.11),
+                6px
+            );
+
+    }
+
+
+    .page-title {
+
+        font-size:
+            18px;
+
+    }
+
+
+    .board-row {
+
+        grid-template-columns:
+            var(--row-title-width)
+            minmax(0,1fr);
+
+    }
+
+
+    .section-message {
+
+        max-width:
+            120px;
+
+        font-size:
+            10px;
+
+    }
+
+
+    .difficulty-button span:first-child {
+
+        display:
+            none;
+
+    }
+
+
+    .difficulty-button {
+
+        padding:
+            5px;
+
+    }
+
+
+    .row-title {
+
+        font-size:
+            8px;
+
+    }
+
+
+    .section-footer {
+
+        font-size:
+            9px;
+
+    }
+
+
+    .card {
+
+        font-size:
+            var(--card-font-size);
+
+    }
+
+
+    .draw-tray {
+
+        min-height:
+            145px;
+
+    }
+
+}
+
+
+/* ==========================================
+   PANTALLAS MUY ANCHAS
+========================================== */
+
+@media (min-width: 1500px) {
+
+    :root {
+
+        --game-width:
+            min(
+                1280px,
+                calc(100vw - 80px)
+            );
+
+
+        /*
+         * En pantallas grandes puede usar
+         * una carta ligeramente mayor,
+         * siempre tomando la altura como base.
+         */
+        --card-width-height:
+            clamp(
+                44px,
+                8.8dvh,
+                72px
+            );
+
+
+        --card-width-space:
+            calc(
+                (
+                    var(--game-width)
+                    - 2px
+                    - (2 * var(--section-pad-x))
+                    - var(--row-title-width)
+                    - (2 * var(--cards-pad-x))
+                    - (7 * var(--card-gap))
+                )
+                / 8
+            );
+
+
+        --card-width:
+            min(
+                var(--card-width-height),
+                var(--card-width-space)
+            );
+
+
+        --card-height:
+            calc(
+                var(--card-width) * 1.38
+            );
+
+    }
+
+
+    .page-title {
+
+        font-size:
+            clamp(
+                24px,
+                2vw,
+                32px
+            );
+
+    }
+
+}
+/* =========================================================
+   REGLAMENTO: PROPORCIONES REALES DE CARTA (ANCHO : ALTO = 1 : 1.38)
+   Sobrescribe la antigua altura mínima de 52/44 px.
+========================================================= */
+.rules-cards { align-items: start; }
+.rules-card {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 1 / 1.38;
+    position: relative;
+    overflow: hidden;
+}
+/* Las letras diagonales del Joker permanecen dentro de sus bordes. */
+.rules-card.joker-card {
+    min-height: 0;
+    aspect-ratio: 1 / 1.38;
+}
+
+/* ==========================================================
+   AJUSTES RESPONSIVE: CARTAS, ETIQUETAS Y JOKERS
+   ========================================================== */
+
+/* El tamaño de las cartas se calcula usando el espacio REAL
+   de cada cards-wrapper, no una estimación basada en viewport. */
+.cards-wrapper {
+    container-type: size;
+}
+
+/* Las variables se aplican a los descendientes porque cqw/cqh
+   se refieren al contenedor más cercano, no al elemento mismo. */
+.cards-wrapper > .cards,
+.cards-wrapper > .locked-label {
+    --card-width: max(0px, min(
+        calc((100cqw - 7 * var(--card-gap)) / 8),
+        calc((100cqh - 26px) / 1.38)
+    ));
+    --card-height: calc(var(--card-width) * 1.38);
+}
+
+/* El rótulo de cada fila debe permanecer dentro de su columna. */
+.row-title {
+    min-width: 0;
+    overflow: hidden;
+    text-align: center;
+    overflow-wrap: anywhere;
+    line-height: 1.1;
+}
+
+/* Evita que el contador se parta en múltiples líneas. */
+.joker-availability {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 0 0 auto;
+    min-width: 0;
+    white-space: nowrap;
+    padding: 4px 6px;
+    font-size: clamp(8px, 1.7vw, 11px);
+    line-height: 1.1;
+}
+
+/* Aprovechar más espacio lateral en móviles. */
+@media (max-width: 768px) {
+    .cards-wrapper {
+        padding: 16px var(--cards-pad-x) 4px;
+    }
+    .cards-wrapper > .cards,
+    .cards-wrapper > .locked-label {
+        --card-width: max(0px, min(
+            calc((100cqw - 7 * var(--card-gap)) / 8),
+            calc((100cqh - 20px) / 1.38)
+        ));
+    }
+}
+
+/* Etiquetas verticales: no invaden las cartas ni salen del borde. */
+@media (max-width: 425px) {
+    :root {
+        --row-title-width: 22px;
+        --section-pad-x: 4px;
+        --cards-pad-x: 3px;
+        --card-gap: 2px;
+    }
+    .board-row {
+        grid-template-columns: var(--row-title-width) minmax(0, 1fr);
+    }
+    .row-title {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        transform: rotate(180deg);
+        font-size: 9px;
+        padding: 3px 1px;
+        letter-spacing: .2px;
+        overflow-wrap: normal;
+        white-space: nowrap;
+    }
+    .joker-availability {
+        font-size: 8px;
+        padding: 3px 4px;
+        gap: 3px;
+    }
+}
+
+/* ==========================================================
+   AJUSTE FINAL: RÓTULOS VERTICALES Y CARTAS MÁS ALTAS
+   ========================================================== */
+:root {
+    --row-title-width: 25px;
+    --card-aspect-height: 1.52;
+}
+
+/* En todas las resoluciones, los títulos ocupan su propia columna. */
+.row-title {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    overflow-wrap: normal;
+    overflow: hidden;
+    padding: 3px 2px;
+    font-size: clamp(9px, 0.9vw, 12px);
+    letter-spacing: 0.35px;
+    text-align: center;
+}
+
+/* Reducir el espacio desperdiciado alrededor de las cartas. */
+.cards-wrapper {
+    padding: 12px 3px 3px;
+}
+
+/* 8 cartas en fila como límite horizontal; el alto disponible manda
+   mientras esas 8 cartas sigan cabiendo. */
+.cards-wrapper > .cards,
+.cards-wrapper > .locked-label {
+    --card-width: max(0px, min(
+        calc((100cqw - 6px - 7 * var(--card-gap)) / 8),
+        calc((100cqh - 15px) / var(--card-aspect-height))
+    ));
+    --card-height: calc(var(--card-width) * var(--card-aspect-height));
+}
+
+/* El rótulo de bloqueo queda sobre las cartas, sin recortarlas. */
+.locked-label { top: 1px; }
+
+@media (max-width: 768px) {
+    :root { --row-title-width: 22px; }
+    .cards-wrapper { padding: 11px 2px 2px; }
+    .cards-wrapper > .cards,
+    .cards-wrapper > .locked-label {
+        --card-width: max(0px, min(
+            calc((100cqw - 4px - 7 * var(--card-gap)) / 8),
+            calc((100cqh - 13px) / var(--card-aspect-height))
+        ));
+    }
+}
+
+@media (max-width: 425px) {
+    .row-title {
+        font-size: 9px;
+        padding: 2px 1px;
+    }
+}
+
+/* Ajuste final: altura del wrapper primero, ancho disponible después.
+   El ancho se reparte según las cartas presentes, no siempre entre ocho. */
+.cards-wrapper {
+    padding: 4px 2px 2px !important;
+    --row-card-count: 2;
+}
+.cards-wrapper > .cards,
+.cards-wrapper > .locked-label {
+    --card-width: max(0px, min(
+        calc((100cqw - 4px - (var(--row-card-count) - 1) * var(--card-gap)) / var(--row-card-count)),
+        calc((100cqh - 6px) / var(--card-aspect-height))
+    ));
+    --card-height: calc(var(--card-width) * var(--card-aspect-height));
+}
+.locked-label { top: 0; }
+@media (max-width: 768px) {
+    .cards-wrapper { padding: 4px 1px 1px !important; }
+    .cards-wrapper > .cards,
+    .cards-wrapper > .locked-label {
+        --card-width: max(0px, min(
+            calc((100cqw - 2px - (var(--row-card-count) - 1) * var(--card-gap)) / var(--row-card-count)),
+            calc((100cqh - 5px) / var(--card-aspect-height))
+        ));
+    }
+}
+
+/* Margen interior equilibrado: cartas grandes sin tocar el borde. */
+.cards-wrapper { padding: 10px 8px 8px !important; }
+.cards-wrapper > .cards,
+.cards-wrapper > .locked-label {
+    /* cqw/cqh ya miden el área interior, sin incluir el padding. */
+    --card-width: max(0px, min(
+        calc((100cqw - 2px - (var(--row-card-count) - 1) * var(--card-gap)) / var(--row-card-count)),
+        calc((100cqh - 3px) / var(--card-aspect-height))
+    ));
+    --card-height: calc(var(--card-width) * var(--card-aspect-height));
+}
+@media (max-width: 768px) {
+    .cards-wrapper { padding: 9px 6px 7px !important; }
+}
+
+/* Tamaño independiente para carta del panel de extracción */
+.draw-tray { --tray-card-width: clamp(74px, 19vw, 102px); }
+
+/* Carta obtenida: tamaño moderado y adaptable a móviles. */
+.draw-tray-card .card {
+    width: var(--card-width, 64px) !important;
+    height: var(--card-height, 97px) !important;
+    flex: 0 0 var(--card-width, 64px) !important;
+    font-size: var(--card-font-size, 20px) !important;
+}
+
+.draw-floating-card {
+    width: var(--card-width, 64px) !important;
+    height: var(--card-height, 97px) !important;
+    font-size: var(--card-font-size, 20px) !important;
+}
+
+@media (max-width: 550px) {
+    .draw-tray-card .card,
+    .draw-floating-card {
+        max-width: 64px;
+        max-height: 97px;
+    }
+}
+
