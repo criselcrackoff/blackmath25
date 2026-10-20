@@ -43,10 +43,15 @@ const DIFFICULTIES = {
    EFECTOS DE SONIDO
 ========================================== */
 
+
+/* ==========================================
+   EFECTOS DE SONIDO
+========================================== */
+
 const gameSounds = {
     start: new Audio("public/audio/startgame.mp3"),
-    pick: new Audio("public/audio/card1.mp3"),
-    place: new Audio("public/audio/card2.mp3")
+    card1: new Audio("public/audio/card1.mp3"),
+    card2: new Audio("public/audio/card2.mp3")
 };
 
 Object.values(gameSounds).forEach(sound => {
@@ -55,18 +60,27 @@ Object.values(gameSounds).forEach(sound => {
 });
 
 function playSound(name) {
-    const sound = gameSounds[name];
+    const original = gameSounds[name];
 
-    if (!sound) return;
+    if (!original) return;
 
-    sound.pause();
-    sound.currentTime = 0;
+    // Permite reproducir efectos consecutivos sin cortar el anterior.
+    const sound = original.cloneNode();
+    sound.volume = original.volume;
 
     sound.play().catch(() => {
-        // El navegador puede bloquear audio
-        // hasta la primera interacción del usuario.
+        // El navegador puede bloquear el audio hasta la primera interacción.
     });
 }
+
+function playRandomCardSound() {
+    const sound = Math.random() < 0.5 ? "card1" : "card2";
+    playSound(sound);
+}
+
+// Evita reproducir el sonido de inicio automáticamente al cargar.
+let initialGameSetup = true;
+
 
 
 
@@ -2113,6 +2127,7 @@ drawButton.addEventListener(
             return;
         }
 
+        playRandomCardSound();
 
         // Capturamos los bloqueos ANTES de añadir la carta.
         const previouslyLocked = playerCards.filter(card => card.lockedRole);
@@ -3754,7 +3769,11 @@ function resetGame() {
 
 
     render();
-
+    if (initialGameSetup) {
+        initialGameSetup = false;
+    } else {
+        playSound("start");
+    }
 }
 
 
