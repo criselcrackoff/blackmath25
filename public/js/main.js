@@ -43,15 +43,15 @@ const DIFFICULTIES = {
    EFECTOS DE SONIDO
 ========================================== */
 
-
-/* ==========================================
-   EFECTOS DE SONIDO
-========================================== */
+const audioBase = new URL(
+    "../audio/",
+    document.currentScript ? document.currentScript.src : window.location.href
+);
 
 const gameSounds = {
-    start: new Audio("public/audio/startgame.mp3"),
-    card1: new Audio("public/audio/card1.mp3"),
-    card2: new Audio("public/audio/card2.mp3")
+    start: new Audio(new URL("startgame.mp3", audioBase).href),
+    card1: new Audio(new URL("card1.mp3", audioBase).href),
+    card2: new Audio(new URL("card2.mp3", audioBase).href)
 };
 
 Object.values(gameSounds).forEach(sound => {
@@ -61,27 +61,19 @@ Object.values(gameSounds).forEach(sound => {
 
 function playSound(name) {
     const original = gameSounds[name];
-
     if (!original) return;
 
-    // Permite reproducir efectos consecutivos sin cortar el anterior.
-    const sound = original.cloneNode();
-    sound.volume = original.volume;
-
-    sound.play().catch(() => {
-        // El navegador puede bloquear el audio hasta la primera interacción.
+    // Reinicia el efecto para que suene completo cada vez que se activa.
+    original.pause();
+    original.currentTime = 0;
+    original.play().catch(() => {
+        // El navegador puede bloquear el audio si no hubo interacción del usuario.
     });
 }
 
 function playRandomCardSound() {
-    const sound = Math.random() < 0.5 ? "card1" : "card2";
-    playSound(sound);
+    playSound(Math.random() < 0.5 ? "card1" : "card2");
 }
-
-// Evita reproducir el sonido de inicio automáticamente al cargar.
-let initialGameSetup = true;
-
-
 
 
 /* =========================================================
@@ -1178,6 +1170,8 @@ function handleBoardPointerDown(
         "0.25";
 
 
+    playRandomCardSound();
+
     dragState = {
 
         source: "board",
@@ -1254,6 +1248,8 @@ function handleTrayPointerDown(
         "dragging"
     );
 
+
+    playRandomCardSound();
 
     dragState = {
 
@@ -2127,7 +2123,7 @@ drawButton.addEventListener(
             return;
         }
 
-        playRandomCardSound();
+        // El efecto de carta suena al recogerla, no al pulsar el botón de robar.
 
         // Capturamos los bloqueos ANTES de añadir la carta.
         const previouslyLocked = playerCards.filter(card => card.lockedRole);
@@ -3595,7 +3591,7 @@ function getDealerTaunt(player, dealer) {
    NUEVA PARTIDA
 ========================================================= */
 
-function resetGame() {
+function resetGame(playStartSound = false) {
     gameGeneration++;
 
     closeDrawOverlay();
@@ -3769,11 +3765,13 @@ function resetGame() {
 
 
     render();
-    if (initialGameSetup) {
-        initialGameSetup = false;
-    } else {
+
+    // El sonido se reproduce solo cuando el usuario inicia o reinicia
+    // una partida, nunca durante la carga inicial de la página.
+    if (playStartSound) {
         playSound("start");
     }
+
 }
 
 
@@ -4037,11 +4035,6 @@ restartButton.addEventListener(
         }
 
 
-        if (dealerPlaying) {
-            resetGame();
-            return;
-        }
-
         newGameModal.classList.add(
             "open"
         );
@@ -4066,7 +4059,7 @@ confirmNewGame.addEventListener(
     "click",
     () => {
 
-        resetGame();
+        resetGame(true);
 
     }
 );
@@ -4099,7 +4092,7 @@ resultNewGame.addEventListener(
     "click",
     () => {
 
-        resetGame();
+        resetGame(true);
 
     }
 );
