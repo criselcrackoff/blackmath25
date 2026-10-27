@@ -1633,7 +1633,15 @@ function movePlacedCard(
     }
 
 
-    playSound("move1");
+    const originalRow = numeratorCards.includes(card)
+        ? "numerator"
+        : denominatorCards.includes(card)
+            ? "denominator"
+            : null;
+
+    if (originalRow !== targetRow) {
+        playSound("move1");
+    }
 
     removeCardFromPlayerRows(
         card
@@ -1740,6 +1748,7 @@ function placeNewCard(
     gameStatus.textContent =
         "Partida en progreso";
 
+    playRandomCardSound();
 
     render();
 
@@ -1824,6 +1833,7 @@ function placePendingCard(
     gameStatus.textContent =
         "Partida en progreso";
 
+    playRandomCardSound();
 
     render();
 
@@ -2169,6 +2179,27 @@ drawButton.addEventListener(
             card => !expectedLocks.has(card.id)
         );
 
+        let replacedOldRect = null;
+
+        if (displaced.length > 0) {
+
+            const replacedCard =
+                displaced[0];
+
+            const replacedElement =
+                document.querySelector(
+                    `.card[data-card-id="${replacedCard.id}"]`
+                );
+
+            if (replacedElement) {
+
+                replacedOldRect =
+                    replacedElement.getBoundingClientRect();
+
+            }
+
+        }
+
         // Las cartas que ahora forman parte del par superior se retiran
         // de su fila anterior ANTES de insertarlas en su destino definitivo.
         if (highest) removeCardFromPlayerRows(highest);
@@ -2205,8 +2236,26 @@ drawButton.addEventListener(
         }
 
         render();
-        if (trayCard) openDrawOverlay();
 
+        if (trayCard) {
+
+            openDrawOverlay();
+
+            if (
+                displaced.length > 0 &&
+                replacedOldRect
+            ) {
+
+                animateHighestReplacement(
+                    newCard,
+                    displaced[0],
+                    replacedOldRect
+                );
+
+            }
+
+        }
+        
     }
 );
 
@@ -3349,6 +3398,156 @@ function render() {
 
 }
 
+/* =========================================================
+   ANIMACIÓN DE REEMPLAZO DE CARTA MÁS ALTA
+========================================================= */
+
+function animateHighestReplacement(
+    newCard,
+    replacedCard,
+    replacedOldRect
+) {
+
+    if (
+        !newCard ||
+        !replacedCard ||
+        !replacedOldRect
+    ) {
+        return;
+    }
+
+    const newCardElement =
+        document.querySelector(
+            `.card[data-card-id="${newCard.id}"]`
+        );
+
+    const trayElement =
+        drawTrayCard.querySelector(
+            `.card[data-card-id="${replacedCard.id}"]`
+        );
+
+    if (
+        !newCardElement ||
+        !trayElement
+    ) {
+        return;
+    }
+
+    const newCardRect =
+        newCardElement.getBoundingClientRect();
+
+    const trayRect =
+        trayElement.getBoundingClientRect();
+
+
+    /*
+     * La carta nueva comienza visualmente
+     * desde donde está la carta reemplazada
+     * en el panel inferior.
+     */
+    const newStartX =
+        trayRect.left -
+        newCardRect.left;
+
+    const newStartY =
+        trayRect.top -
+        newCardRect.top;
+
+
+    /*
+     * La carta reemplazada comienza desde
+     * su posición anterior en la fila.
+     */
+    const replacedStartX =
+        replacedOldRect.left -
+        trayRect.left;
+
+    const replacedStartY =
+        replacedOldRect.top -
+        trayRect.top;
+
+
+    /*
+     * Evitar interacción mientras dura
+     * la animación.
+     */
+    newCardElement.style.pointerEvents =
+        "none";
+
+    trayElement.style.pointerEvents =
+        "none";
+
+
+    /*
+     * Carta nueva:
+     * PANEL → nueva posición.
+     */
+    const newAnimation =
+        newCardElement.animate(
+            [
+                {
+                    transform:
+                        `translate(${newStartX}px, ${newStartY}px)`
+                },
+                {
+                    transform:
+                        "translate(0, 0)"
+                }
+            ],
+            {
+                duration: 400,
+                easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+                fill: "both"
+            }
+        );
+
+
+    /*
+     * Carta reemplazada:
+     * posición anterior → PANEL.
+     */
+    const replacedAnimation =
+        trayElement.animate(
+            [
+                {
+                    transform:
+                        `translate(${replacedStartX}px, ${replacedStartY}px)`
+                },
+                {
+                    transform:
+                        "translate(0, 0)"
+                }
+            ],
+            {
+                duration: 400,
+                easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+                fill: "both"
+            }
+        );
+
+
+    Promise.all([
+        newAnimation.finished,
+        replacedAnimation.finished
+    ]).then(() => {
+
+        newCardElement.style.pointerEvents =
+            "";
+
+        trayElement.style.pointerEvents =
+            "";
+
+    }).catch(() => {
+
+        newCardElement.style.pointerEvents =
+            "";
+
+        trayElement.style.pointerEvents =
+            "";
+
+    });
+
+}
 
 /* =========================================================
    RENDER JUGADOR
