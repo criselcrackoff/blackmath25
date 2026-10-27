@@ -16,26 +16,28 @@ const DEALER_DELAY = 700;
 const DIFFICULTIES = {
 
     easy: {
-        label: "Fácil",
-        standValue: 21,
-        minCards: 6,
-        errorChance: 0.70
+        label: "Facil",
+        bestArrangementChance: 0.05,
+        standValue: 50,
+        minCards: 8,
+        errorChance: 0.98
     },
 
     normal: {
         label: "Normal",
-        standValue: 22,
+        bestArrangementChance: 0.80,
+        standValue: 23,
         minCards: 3,
-        errorChance: 0.20
+        errorChance: 0.35
     },
 
     hard: {
-        label: "Difícil",
+        label: "Dificil",
+        bestArrangementChance: 0.95,
         standValue: 24,
         minCards: 2,
         errorChance: 0.05
     }
-
 };
 
 
@@ -51,7 +53,11 @@ const audioBase = new URL(
 const gameSounds = {
     start: new Audio(new URL("startgame.mp3", audioBase).href),
     card1: new Audio(new URL("card1.mp3", audioBase).href),
-    card2: new Audio(new URL("card2.mp3", audioBase).href)
+    card2: new Audio(new URL("card2.mp3", audioBase).href),
+    card3: new Audio(new URL("card3.mp3", audioBase).href),
+    move1: new Audio(new URL("move1.mp3", audioBase).href),
+    pick1: new Audio(new URL("pick1.mp3", audioBase).href),
+    pick2: new Audio(new URL("pick2.mp3", audioBase).href)
 };
 
 Object.values(gameSounds).forEach(sound => {
@@ -63,16 +69,28 @@ function playSound(name) {
     const original = gameSounds[name];
     if (!original) return;
 
-    // Reinicia el efecto para que suene completo cada vez que se activa.
-    original.pause();
-    original.currentTime = 0;
-    original.play().catch(() => {
+    // Los efectos se clonan para permitir que varios sonidos se solapen.
+    // El audio de inicio se reutiliza y reinicia para evitar duplicarlo.
+    const sound = name === "start" ? original : original.cloneNode();
+    sound.volume = original.volume;
+
+    if (name === "start") {
+        sound.pause();
+        sound.currentTime = 0;
+    }
+
+    sound.play().catch(() => {
         // El navegador puede bloquear el audio si no hubo interacción del usuario.
     });
 }
 
 function playRandomCardSound() {
-    playSound(Math.random() < 0.5 ? "card1" : "card2");
+    const sounds = ["card1", "card2", "card3"];
+    playSound(sounds[Math.floor(Math.random() * sounds.length)]);
+}
+
+function playRandomPickSound() {
+    playSound(Math.random() < 0.5 ? "pick1" : "pick2");
 }
 
 
@@ -1170,7 +1188,7 @@ function handleBoardPointerDown(
         "0.25";
 
 
-    playRandomCardSound();
+    playRandomPickSound();
 
     dragState = {
 
@@ -1249,7 +1267,7 @@ function handleTrayPointerDown(
     );
 
 
-    playRandomCardSound();
+    playRandomPickSound();
 
     dragState = {
 
@@ -1614,6 +1632,8 @@ function movePlacedCard(
 
     }
 
+
+    playSound("move1");
 
     removeCardFromPlayerRows(
         card
@@ -2902,7 +2922,7 @@ function animateDealerCards(
 
         // Elevar la carta sin sacarla del flujo del diseño.
         element.style.position = "relative";
-        element.style.zIndex = "9999";
+        element.style.zIndex = "10";
 
         const animation = element.animate(
             [
