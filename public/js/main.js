@@ -2814,210 +2814,310 @@ function randomDealerArrangement() {
 
 
 /* =========================================================
+   ANIMACIONES DEL DEALER
+========================================================= */
+
+function getDealerCardPositions() {
+    const positions = new Map();
+
+    document
+        .querySelectorAll(
+            "#dealer-numerator .card[data-card-id], " +
+            "#dealer-denominator .card[data-card-id]"
+        )
+        .forEach(element => {
+            const id = Number(element.dataset.cardId);
+            const rect = element.getBoundingClientRect();
+
+            positions.set(id, {
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                height: rect.height
+            });
+        });
+
+    return positions;
+}
+
+
+
+
+function animateDealerCards(
+    previousPositions = new Map(),
+    newCardId = null
+) {
+    const elements = document.querySelectorAll(
+        "#dealer-numerator .card[data-card-id], " +
+        "#dealer-denominator .card[data-card-id]"
+    );
+
+    const dealerPanel =
+        dealerNumerator.parentElement?.parentElement;
+
+    const sourceRect =
+        dealerPanel?.getBoundingClientRect();
+
+    let didAnimate = false;
+
+    elements.forEach(element => {
+        const id = Number(element.dataset.cardId);
+        const target = element.getBoundingClientRect();
+        const previous = previousPositions.get(id);
+
+        let dx;
+        let dy;
+        let duration = 360;
+
+        if (id === newCardId && sourceRect) {
+            // La carta nueva comienza en el área del dealer.
+            dx =
+                sourceRect.left +
+                sourceRect.width / 2 -
+                (target.left + target.width / 2);
+
+            dy =
+                sourceRect.top +
+                Math.min(sourceRect.height * 0.35, 90) -
+                (target.top + target.height / 2);
+
+            duration = 430;
+        } else if (previous) {
+            // Las cartas existentes parten de su posición anterior.
+            dx = previous.left - target.left;
+            dy = previous.top - target.top;
+
+            // Si no se desplazó, no se anima ni se modifica.
+            if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
+                return;
+            }
+        } else {
+            return;
+        }
+
+        didAnimate = true;
+
+        const originalZIndex = element.style.zIndex;
+        const originalPosition = element.style.position;
+
+        // Elevar la carta sin sacarla del flujo del diseño.
+        element.style.position = "relative";
+        element.style.zIndex = "9999";
+
+        const animation = element.animate(
+            [
+                {
+                    transform:
+                        `translate(${dx}px, ${dy}px)`,
+                    opacity: id === newCardId ? 0.4 : 1
+                },
+                {
+                    transform: "translate(0px, 0px)",
+                    opacity: 1
+                }
+            ],
+            {
+                duration,
+                easing: "cubic-bezier(0.22, 0.75, 0.25, 1)"
+            }
+        );
+
+        const restoreStyles = () => {
+            element.style.zIndex = originalZIndex;
+            element.style.position = originalPosition;
+        };
+
+        animation.onfinish = () => {
+            animation.cancel();
+            restoreStyles();
+        };
+
+        animation.oncancel = restoreStyles;
+    });
+
+    return didAnimate;
+}
+
+
+
+
+/* =========================================================
    JUEGO DEL DEALER
 ========================================================= */
+
 
 async function playDealer() {
     const generation = gameGeneration;
 
     closeDrawOverlay();
 
+    dealerMessage.textContent =
+        "Veamos... voy a organizar mis cartas.";
 
-    renderDealer(
-        true
-    );
+    renderDealer(true);
 
-
-    await wait(
-        DEALER_DELAY
-    );
+    await wait(DEALER_DELAY);
     if (generation !== gameGeneration) return;
 
+    while (dealerCards.length < MAX_CARDS) {
 
-    while (
-        dealerCards.length <
-        MAX_CARDS
-    ) {
+        /*
+         * REORGANIZACIÓN INICIAL
+         */
+        const beforeArrangement =
+            getDealerCardPositions();
 
         const best =
-            evaluateArrangement(
-                dealerCards
-            );
-
+            evaluateArrangement(dealerCards);
 
         const config =
-            DIFFICULTIES[
-                difficulty
-            ];
-
+            DIFFICULTIES[difficulty];
 
         if (best) {
-
-            if (
-                Math.random() <
-                config.errorChance
-            ) {
-
+            if (Math.random() < config.errorChance) {
                 randomDealerArrangement();
-
             } else {
-
-                applyDealerArrangement(
-                    best
-                );
-
+                applyDealerArrangement(best);
             }
 
+            renderDealer(true);
+
+            const rearranged =
+                animateDealerCards(beforeArrangement);
+
+            if (rearranged) {
+                dealerMessage.textContent =
+                    "Déjame ordenar mejor estas cartas...";
+
+                await wait(380);
+                if (generation !== gameGeneration) return;
+            }
         }
 
+        const score = calculateDealerScore();
 
-        const score =
-            calculateDealerScore();
-
-
-        if (
-            dealerCards.length >=
-            config.minCards
-        ) {
+        /*
+         * COMPROBAR SI EL DEALER PUEDE PLANTARSE
+         */
+        if (dealerCards.length >= config.minCards) {
 
             if (
-                score >=
-                config.standValue &&
+                score >= config.standValue &&
                 score <= LIMIT
             ) {
-
                 break;
-
             }
 
-
-            if (
-                score > LIMIT
-            ) {
+            /*
+             * INTENTAR RECUPERARSE SI SUPERA 25
+             */
+            if (score > LIMIT) {
+                const beforeRecovery =
+                    getDealerCardPositions();
 
                 const recovery =
-                    evaluateArrangement(
-                        dealerCards
-                    );
-
+                    evaluateArrangement(dealerCards);
 
                 if (recovery) {
+                    applyDealerArrangement(recovery);
+                    renderDealer(true);
 
-                    applyDealerArrangement(
-                        recovery
-                    );
+                    const recoveredLayout =
+                        animateDealerCards(beforeRecovery);
 
+                    if (recoveredLayout) {
+                        dealerMessage.textContent =
+                            "Me pasé... voy a corregir la distribución.";
+
+                        await wait(380);
+                        if (generation !== gameGeneration) return;
+                    }
 
                     const recovered =
                         calculateDealerScore();
 
-
                     if (
                         recovered <= LIMIT &&
-                        recovered >=
-                        config.standValue
+                        recovered >= config.standValue
                     ) {
-
                         break;
-
                     }
-
                 }
-
             }
-
         }
-
-
-        const dealerCanUseJokers =
-            difficulty === "hard";
-
-        const newCard =
-            drawCard(
-                dealerCanUseJokers
-            );
-
-
-        if (!newCard) {
-            break;
-        }
-
-
-        dealerCards.push(
-            newCard
-        );
-
-        
-        dealerMessage.textContent = newCard.isJoker
-            ? "¡Un Joker! Tendré que replantear mi estrategia..."
-            : `He sacado ${newCard.rank ?? newCard.value ?? "una carta"}. Estoy calculando...`;
-
-
-        initializeDealerLocks();
-
 
         /*
-         * Reorganiza inmediatamente si obtiene
-         * ambos Jokers.
+         * SACAR UNA CARTA NUEVA
          */
-        const bestAfterDraw =
-            evaluateArrangement(
-                dealerCards
-            );
+        
+        const dealerCanUseJokers = difficulty === "hard";
 
+        const newCard = drawCard(dealerCanUseJokers);
+
+        if (!newCard) break;
+
+        // 1. Guardar posiciones antes de modificar el tablero.
+        const beforeDraw = getDealerCardPositions();
+
+        // 2. Añadir la carta.
+        dealerCards.push(newCard);
+
+        // 3 y 4. Calcular y aplicar la distribución definitiva.
+        const bestAfterDraw = evaluateArrangement(dealerCards);
 
         if (bestAfterDraw) {
-
-            applyDealerArrangement(
-                bestAfterDraw
-            );
-
+            applyDealerArrangement(bestAfterDraw);
         }
 
+        // 5. Actualizar el tablero directamente con la distribución final.
+        renderDealer(true);
 
-        renderDealer(
-            true
-        );
+        // 6. Animar las cartas desde sus posiciones anteriores.
+        playRandomCardSound();
 
+        dealerMessage.textContent = newCard.isJoker
+            ? "¡Un Joker! A ver cómo encaja en mi estrategia..."
+            : "Voy a sacar otra carta...";
 
-        await wait(
-            DEALER_DELAY
-        );
-    if (generation !== gameGeneration) return;
+        animateDealerCards(beforeDraw, newCard.id);
+
+        await wait(460);
+        if (generation !== gameGeneration) return;
 
     }
 
+    /*
+     * DISTRIBUCIÓN FINAL
+     */
+    const beforeFinalArrangement =
+        getDealerCardPositions();
 
     const finalBest =
-        evaluateArrangement(
-            dealerCards
-        );
-
+        evaluateArrangement(dealerCards);
 
     if (finalBest) {
-
-        applyDealerArrangement(
-            finalBest
-        );
-
+        applyDealerArrangement(finalBest);
     }
 
+    renderDealer(true);
 
-    renderDealer(
-        true
-    );
+    const finalMoved =
+        animateDealerCards(beforeFinalArrangement);
 
+    if (finalMoved) {
+        await wait(380);
+        if (generation !== gameGeneration) return;
+    }
 
-    await wait(
-        500
-    );
+    await wait(250);
     if (generation !== gameGeneration) return;
 
-    dealerMessage.textContent = "Ya tengo mi resultado.";
+    dealerMessage.textContent =
+        "Ya tengo mi resultado.";
 
     finishGame();
-
 }
+
 
 
 /* =========================================================
@@ -3041,99 +3141,97 @@ function wait(ms) {
    RENDER DEALER
 ========================================================= */
 
-function renderDealer(
-    reveal
-) {
-    dealerNumerator.parentElement.style.setProperty("--row-card-count", Math.max(1, dealerNumeratorCards.length));
-    dealerDenominator.parentElement.style.setProperty("--row-card-count", Math.max(1, dealerDenominatorCards.length));
 
+function renderDealer(reveal) {
+    dealerNumerator.parentElement.style.setProperty(
+        "--row-card-count",
+        Math.max(1, dealerNumeratorCards.length)
+    );
 
-    dealerNumerator.innerHTML =
-        "";
+    dealerDenominator.parentElement.style.setProperty(
+        "--row-card-count",
+        Math.max(1, dealerDenominatorCards.length)
+    );
 
+    // Guardar las cartas que ya existen para reutilizarlas.
+    const existingCards = new Map();
 
-    dealerDenominator.innerHTML =
-        "";
-
-
-    for (
-        const card of
-        dealerNumeratorCards
-    ) {
-
-        const hide =
-            !reveal &&
-            dealerCards.length > 0 &&
-            card.id ===
-            dealerCards[0].id;
-
-
-        dealerNumerator.appendChild(
-
-            createCardElement(
-                card,
-                {
-                    source:
-                        "dealer",
-
-                    hidden:
-                        hide
-                }
-            )
-
+    document.querySelectorAll(
+        "#dealer-numerator .card[data-card-id], " +
+        "#dealer-denominator .card[data-card-id]"
+    ).forEach(element => {
+        existingCards.set(
+            Number(element.dataset.cardId),
+            element
         );
+    });
 
+    function updateRow(container, cards) {
+        cards.forEach((card, index) => {
+            const hide =
+                !reveal &&
+                dealerCards.length > 0 &&
+                card.id === dealerCards[0].id;
+
+            let element = existingCards.get(card.id);
+
+            // Crear únicamente las cartas que todavía no existen.
+            if (!element) {
+                element = createCardElement(card, {
+                    source: "dealer",
+                    hidden: hide
+                });
+            }
+
+            // Revelar u ocultar la carta correctamente.
+            const wasHidden = element.classList.contains("hidden-card");
+
+            if (wasHidden !== hide) {
+                const replacement = createCardElement(card, {
+                    source: "dealer",
+                    hidden: hide
+                });
+
+                element.replaceWith(replacement);
+                element = replacement;
+
+                existingCards.set(card.id, element);
+            }
+
+            // Moverla solo si está en otro contenedor o posición.
+            const currentElement = container.children[index];
+
+            if (currentElement !== element) {
+                container.insertBefore(
+                    element,
+                    currentElement || null
+                );
+            }
+        });
+
+        // Retirar únicamente cartas que ya no pertenecen a esta fila.
+        const validIds = new Set(cards.map(card => card.id));
+
+        Array.from(container.children).forEach(element => {
+            const id = Number(element.dataset.cardId);
+
+            if (!validIds.has(id)) {
+                element.remove();
+            }
+        });
     }
 
-
-    for (
-        const card of
-        dealerDenominatorCards
-    ) {
-
-        const hide =
-            !reveal &&
-            dealerCards.length > 0 &&
-            card.id ===
-            dealerCards[0].id;
-
-
-        dealerDenominator.appendChild(
-
-            createCardElement(
-                card,
-                {
-                    source:
-                        "dealer",
-
-                    hidden:
-                        hide
-                }
-            )
-
-        );
-
-    }
-
+    updateRow(dealerNumerator, dealerNumeratorCards);
+    updateRow(dealerDenominator, dealerDenominatorCards);
 
     dealerCardCount.textContent =
         `${dealerCards.length}/${MAX_CARDS}`;
 
-
-    if (reveal) {
-
-        dealerScore.textContent =
-            calculateDealerScore()
-                .toFixed(2);
-
-    } else {
-
-        dealerScore.textContent =
-            "Oculto";
-
-    }
-
+    dealerScore.textContent = reveal
+        ? calculateDealerScore().toFixed(2)
+        : "Oculto";
 }
+
 
 
 /* =========================================================
