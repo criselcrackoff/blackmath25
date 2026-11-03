@@ -107,6 +107,15 @@ const rulesButton = document.getElementById("rules-button");
 const rulesModal = document.getElementById("rules-modal");
 const closeRules = document.getElementById("close-rules");
 
+const tutorialButton = document.getElementById("tutorial-button");
+const tutorialOverlay = document.getElementById("tutorial-overlay");
+const tutorialTitle = document.getElementById("tutorial-title");
+const tutorialDescription = document.getElementById("tutorial-description");
+const tutorialStepLabel = document.getElementById("tutorial-step-label");
+const tutorialProgressFill = document.getElementById("tutorial-progress-fill");
+const tutorialNext = document.getElementById("tutorial-next");
+const tutorialSkip = document.getElementById("tutorial-skip");
+
 const newGameModal = document.getElementById("new-game-modal");
 const restartButton = document.getElementById("restart-button");
 const cancelNewGame = document.getElementById("cancel-new-game");
@@ -2240,6 +2249,10 @@ drawButton.addEventListener(
 
         render();
 
+        if (tutorialStep === 1 && tutorialWaitingForDraw) {
+            showTutorialStep(2);
+        }
+
         if (trayCard) {
 
             openDrawOverlay();
@@ -2516,31 +2529,6 @@ function evaluateArrangement(cards) {
             best.score <= config.maxValue;
 
         // Siempre preferir una puntuación dentro del rango.
-        // DIFÍCIL: buscar la puntuación más alta posible sin superar 25.
-        if (difficulty === "hard") {
-
-            const candidateValid = score <= LIMIT;
-            const bestValid = best && best.score <= LIMIT;
-
-            if (
-                !best ||
-                (candidateValid && !bestValid) ||
-                (
-                    candidateValid === bestValid &&
-                    (
-                        candidateValid
-                            ? score > best.score
-                            : score < best.score
-                    )
-                )
-            ) {
-                best = candidate;
-            }
-
-            continue;
-        }
-
-        // Fácil y Normal mantienen su comportamiento original.
         if (candidateInRange && !bestInRange) {
             best = candidate;
             continue;
@@ -2932,7 +2920,6 @@ async function playDealer() {
             DIFFICULTIES[difficulty];
 
         if (best) {
-
             if (Math.random() < config.errorChance) {
                 randomDealerArrangement();
             } else {
@@ -2945,12 +2932,10 @@ async function playDealer() {
                 animateDealerCards(beforeArrangement);
 
             if (rearranged) {
-
                 dealerMessage.textContent =
                     "Déjame ordenar mejor estas cartas...";
 
-                await wait(430);
-
+                await wait(380);
                 if (generation !== gameGeneration) return;
             }
         }
@@ -4179,6 +4164,169 @@ document.addEventListener(
 
 
 /* =========================================================
+   TUTORIAL INTERACTIVO
+========================================================= */
+
+const tutorialSteps = [
+    {
+        title: "¡Bienvenido a Mathematical 25!",
+        description: "Tu objetivo es conseguir la puntuación más alta posible sin superar 25. En este recorrido conocerás los controles y las partes principales del juego.",
+        target: null,
+        button: "Comenzar"
+    },
+    {
+        title: "1. Saca una carta",
+        description: "Pulsa «PEDIR CARTA» para robar una carta de la baraja. Cada partida comienza con dos cartas y puedes llegar hasta ocho.",
+        target: "#draw-button",
+        button: "¡Entendido!",
+        waitForDraw: true
+    },
+    {
+        title: "2. Coloca la carta",
+        description: "La carta que robes aparecerá en este panel. Arrástrala hasta el Numerador o el Denominador. Las cartas bloqueadas no se pueden mover. Si obtienes un Joker, también podrás descartarlo.",
+        target: "#draw-tray",
+        button: "Siguiente"
+    },
+    {
+        title: "3. Cantidad de cartas",
+        description: "Aquí puedes revisar cuántas cartas tienes en total. El límite es de 8 cartas. El contador del Dealer también aparece en la parte superior.",
+        target: "#card-count",
+        button: "Siguiente"
+    },
+    {
+        title: "4. Tu puntuación",
+        description: "Este es tu puntaje actual. Se calcula usando los productos del Numerador y Denominador, la cantidad de cartas y el multiplicador ×2. ¡Intenta acercarte a 25 sin pasarte!",
+        target: "#player-score",
+        button: "Siguiente"
+    },
+    {
+        title: "5. El Dealer",
+        description: "Esta sección muestra las cartas y el progreso del Dealer. Su puntuación permanece oculta durante tu turno y se revela cuando termina la partida.",
+        target: ".dealer-section",
+        button: "Siguiente"
+    },
+    {
+        title: "¡Ya estás listo!",
+        description: "Organiza tus cartas, pide nuevas cuando te convenga y pulsa «PLANTARSE» para terminar tu turno. Después jugará el Dealer. ¡Buena suerte!",
+        target: null,
+        button: "¡Jugar!"
+    }
+];
+
+let tutorialStep = -1;
+let tutorialWaitingForDraw = false;
+
+function clearTutorialTarget() {
+    document.querySelectorAll(".tutorial-highlight").forEach(element => {
+        element.classList.remove("tutorial-highlight");
+    });
+}
+
+function showTutorialStep(index) {
+    if (index < 0 || index >= tutorialSteps.length) {
+        finishTutorial();
+        return;
+    }
+
+    clearTutorialTarget();
+
+    document.getElementById("tutorial-backdrop").classList.add("open");
+
+    tutorialStep = index;
+
+    const step = tutorialSteps[index];
+
+    const tutorialCard = tutorialOverlay.querySelector(".tutorial-card");
+
+    tutorialCard.classList.remove(
+        "tutorial-position-top",
+        "tutorial-position-bottom"
+    );
+
+    // El Dealer necesita espacio para mostrar toda su interfaz.
+    tutorialCard.classList.add(
+        index === 5
+            ? "tutorial-position-bottom"
+            : "tutorial-position-top"
+    );
+
+    tutorialTitle.textContent = step.title;
+    tutorialDescription.textContent = step.description;
+    tutorialStepLabel.textContent = `PASO ${index + 1} DE ${tutorialSteps.length}`;
+    tutorialProgressFill.style.width = `${((index + 1) / tutorialSteps.length) * 100}%`;
+    tutorialNext.textContent = step.button;
+    tutorialNext.disabled = false;
+
+    tutorialWaitingForDraw = Boolean(step.waitForDraw);
+    tutorialNext.classList.toggle("hidden", tutorialWaitingForDraw);
+
+    if (step.target) {
+        const target = document.querySelector(step.target);
+
+        if (target) {
+            target.classList.add("tutorial-highlight");
+
+            // Solo desplazar elementos normales de la página.
+            // La bandeja y los elementos fijos no deben desplazarse.
+            if (
+                step.target !== "#draw-tray" &&
+                step.target !== "#draw-button" &&
+                step.target !== "#card-count" &&
+                step.target !== "#player-score" &&
+                step.target !== ".dealer-section"
+            ) {
+                target.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                    inline: "nearest"
+                });
+            }
+        }
+    }
+
+    tutorialOverlay.classList.add("open");
+}
+
+function startTutorial() {
+    if (gameOver) return;
+    showTutorialStep(0);
+}
+
+function finishTutorial() {
+    clearTutorialTarget();
+    document.getElementById("tutorial-backdrop").classList.remove("open");
+    tutorialOverlay.classList.remove("open");
+    tutorialWaitingForDraw = false;
+    tutorialStep = -1;
+    try {
+        localStorage.setItem("mathematical25_tutorial_seen", "1");
+    } catch (error) {
+        // El tutorial sigue funcionando aunque el navegador bloquee el almacenamiento.
+    }
+    
+}
+
+function advanceTutorial() {
+    if (tutorialStep === 1 && tutorialWaitingForDraw) return;
+    showTutorialStep(tutorialStep + 1);
+}
+
+tutorialButton.addEventListener("click", startTutorial);
+tutorialNext.addEventListener("click", advanceTutorial);
+tutorialSkip.addEventListener("click", finishTutorial);
+
+// El tutorial aparece automáticamente solo la primera vez.
+// El botón 🎓 permite volver a abrirlo cuando el jugador quiera.
+try {
+    if (!localStorage.getItem("mathematical25_tutorial_seen")) {
+        window.setTimeout(startTutorial, 500);
+    }
+} catch (error) {
+    window.setTimeout(startTutorial, 500);
+}
+
+
+/* =========================================================
    REGLAS
 ========================================================= */
 
@@ -4368,6 +4516,11 @@ document.addEventListener(
 
         }
 
+
+        if (tutorialOverlay.classList.contains("open")) {
+            finishTutorial();
+            return;
+        }
 
         closeDifficultyFlyout();
 

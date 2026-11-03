@@ -3872,3 +3872,198 @@ button:disabled {
     }
 }
 
+
+
+/* ==========================================
+   TUTORIAL INTERACTIVO
+========================================== */
+
+.tutorial-button {
+    position: fixed;
+    top: clamp(7px, 1.5vh, 14px);
+    right: clamp(56px, calc(1vw + 49px), 66px);
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #121a26;
+    color: #e5e7eb;
+    font-size: 19px;
+    cursor: pointer;
+    z-index: 3000;
+    transition: transform 0.15s, background 0.15s;
+}
+
+.tutorial-button:hover {
+    background: #202c3d;
+    transform: translateY(-1px);
+}
+
+.tutorial-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: clamp(16px, 4vh, 38px) 14px 14px;
+
+    background: transparent;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition: opacity .25s ease, visibility .25s ease;
+    z-index: 3000;
+}
+
+.tutorial-card {
+    z-index: 7000;
+}
+
+.tutorial-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tutorial-card {
+    position: fixed;
+    top: clamp(16px, 4vh, 38px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 7000;
+    width: min(480px, 100%);
+    padding: 20px 22px;
+    border: 1px solid #40516a;
+    border-radius: 14px;
+    background: #172334;
+    color: #e5e7eb;
+    box-shadow: 0 18px 55px rgba(0, 0, 0, 0.55);
+    pointer-events: auto;
+}
+
+.tutorial-card.tutorial-position-top {
+    top: clamp(16px, 4vh, 38px);
+    bottom: auto;
+    transition: 200ms;
+}
+
+.tutorial-card.tutorial-position-bottom {
+    top: auto;
+    bottom: clamp(16px, 4vh, 38px);
+    transition: 500ms;
+}
+
+.tutorial-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    color: #9fb4d0;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+}
+
+.tutorial-skip {
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
+    color: #aab8ca;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.tutorial-skip:hover {
+    color: white;
+}
+
+.tutorial-progress-track {
+    width: 100%;
+    height: 5px;
+    overflow: hidden;
+    margin-bottom: 17px;
+    border-radius: 99px;
+    background: #29384c;
+}
+
+#tutorial-progress-fill {
+    width: 14.28%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--blue);
+    transition: width 0.2s ease;
+}
+
+.tutorial-card h2 {
+    margin: 0 0 9px;
+    color: #fff;
+    font-size: clamp(18px, 3vw, 22px);
+}
+
+.tutorial-card p {
+    margin: 0;
+    color: #c4d0df;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.tutorial-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 19px;
+}
+
+.tutorial-actions button {
+    min-width: 120px;
+    padding: 10px 17px;
+}
+
+.tutorial-highlight {
+    position: relative;
+    z-index: 1600 !important;
+    outline: 3px solid #ffd54a !important;
+    outline-offset: 5px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, .76);
+    animation: tutorial-pulse 1.5s infinite;
+}
+
+#tutorial-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .76);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 1400;
+    transition: opacity .25s ease, visibility .25s ease;
+}
+
+#tutorial-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+#draw-tray.tutorial-highlight {
+    position: absolute !important;
+}
+
+@keyframes tutorial-pulse {
+    0%, 100% { outline-color: #60a5fa; }
+    50% { outline-color: #bfdbfe; }
+}
+
+@media (max-width: 600px) {
+    .tutorial-card {
+        padding: 17px;
+    }
+
+    .tutorial-card p {
+        font-size: 13px;
+    }
+
+    .tutorial-overlay {
+        padding-top: 12px;
+    }
+}

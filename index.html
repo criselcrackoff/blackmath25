@@ -43,6 +43,14 @@
     📖
 </button>
 
+<button
+    id="tutorial-button"
+    class="tutorial-button"
+    title="Ver tutorial"
+>
+    🎓
+</button>
+
 
 <!-- ==========================================
      MODAL DE REGLAS
@@ -700,6 +708,26 @@
 
     </div>
 
+</div>
+
+
+<!-- ==========================================
+     TUTORIAL INTERACTIVO
+========================================== -->
+<div id="tutorial-backdrop"></div>
+<div id="tutorial-overlay" class="tutorial-overlay" aria-live="polite">
+    <div class="tutorial-card" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+        <div class="tutorial-progress">
+            <span id="tutorial-step-label">PASO 1 DE 7</span>
+            <button id="tutorial-skip" class="tutorial-skip" type="button">Saltar tutorial ✕</button>
+        </div>
+        <div class="tutorial-progress-track"><div id="tutorial-progress-fill"></div></div>
+        <h2 id="tutorial-title">¡Bienvenido a Mathematical 25!</h2>
+        <p id="tutorial-description">Aprende lo básico en unos pocos pasos. Te mostraremos las partes importantes de la mesa.</p>
+        <div class="tutorial-actions">
+            <button id="tutorial-next" class="primary-button" type="button">Comenzar</button>
+        </div>
+    </div>
 </div>
 
 
