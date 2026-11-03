@@ -18,8 +18,8 @@ const DIFFICULTIES = {
     easy: {
         label: "Facil",
         bestArrangementChance: 0.05,
-        minValue: 10,
-        maxValue: 19,
+        minValue: 12,
+        maxValue: 21,
         minCards: 8,
         errorChance: 0.98
     },
