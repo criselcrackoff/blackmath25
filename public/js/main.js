@@ -39,7 +39,7 @@ const DIFFICULTIES = {
         minValue: 24,
         maxValue: 25,
         minCards: 2,
-        errorChance: 0.05
+        errorChance: 0
     }
 };
 
@@ -2516,6 +2516,31 @@ function evaluateArrangement(cards) {
             best.score <= config.maxValue;
 
         // Siempre preferir una puntuación dentro del rango.
+        // DIFÍCIL: buscar la puntuación más alta posible sin superar 25.
+        if (difficulty === "hard") {
+
+            const candidateValid = score <= LIMIT;
+            const bestValid = best && best.score <= LIMIT;
+
+            if (
+                !best ||
+                (candidateValid && !bestValid) ||
+                (
+                    candidateValid === bestValid &&
+                    (
+                        candidateValid
+                            ? score > best.score
+                            : score < best.score
+                    )
+                )
+            ) {
+                best = candidate;
+            }
+
+            continue;
+        }
+
+        // Fácil y Normal mantienen su comportamiento original.
         if (candidateInRange && !bestInRange) {
             best = candidate;
             continue;
@@ -2907,6 +2932,7 @@ async function playDealer() {
             DIFFICULTIES[difficulty];
 
         if (best) {
+
             if (Math.random() < config.errorChance) {
                 randomDealerArrangement();
             } else {
@@ -2919,10 +2945,12 @@ async function playDealer() {
                 animateDealerCards(beforeArrangement);
 
             if (rearranged) {
+
                 dealerMessage.textContent =
                     "Déjame ordenar mejor estas cartas...";
 
-                await wait(380);
+                await wait(430);
+
                 if (generation !== gameGeneration) return;
             }
         }
