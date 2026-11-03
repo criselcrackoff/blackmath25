@@ -18,7 +18,8 @@ const DIFFICULTIES = {
     easy: {
         label: "Facil",
         bestArrangementChance: 0.05,
-        standValue: 50,
+        minValue: 10,
+        maxValue: 19,
         minCards: 8,
         errorChance: 0.98
     },
@@ -26,7 +27,8 @@ const DIFFICULTIES = {
     normal: {
         label: "Normal",
         bestArrangementChance: 0.80,
-        standValue: 23,
+        minValue: 20,
+        maxValue: 23,
         minCards: 3,
         errorChance: 0.35
     },
@@ -34,7 +36,8 @@ const DIFFICULTIES = {
     hard: {
         label: "Dificil",
         bestArrangementChance: 0.95,
-        standValue: 24,
+        minValue: 24,
+        maxValue: 25,
         minCards: 2,
         errorChance: 0.05
     }
@@ -2433,267 +2436,128 @@ function initializeDealerLocks() {
    EVALUAR ARREGLOS DEL DEALER
 ========================================================= */
 
-function evaluateArrangement(
-    cards
-) {
+function evaluateArrangement(cards) {
 
-    if (
-        cards.length ===
-        0
-    ) {
-
+    if (cards.length === 0) {
         return null;
-
     }
 
+    const config = DIFFICULTIES[difficulty];
 
     const {
         highest,
         second
-    } =
-        getHighestCards(
-            cards
-        );
+    } = getHighestCards(cards);
 
+    const lockedIds = new Set();
 
-    /*
-     * Solo las cartas no bloqueadas
-     * pueden repartirse entre filas.
-     */
-    const lockedIds =
-        new Set();
+    if (highest) lockedIds.add(highest.id);
+    if (second) lockedIds.add(second.id);
 
+    const unlocked = cards.filter(
+        card => !lockedIds.has(card.id)
+    );
 
-    if (highest) {
-        lockedIds.add(
-            highest.id
-        );
-    }
+    let best = null;
 
+    const targetMiddle =
+        (config.minValue + config.maxValue) / 2;
 
-    if (second) {
-        lockedIds.add(
-            second.id
-        );
-    }
+    const total = 2 ** unlocked.length;
 
+    for (let mask = 0; mask < total; mask++) {
 
-    const unlocked =
-        cards.filter(
-            card =>
-                !lockedIds.has(
-                    card.id
-                )
-        );
+        const numerator = [];
+        const denominator = [];
 
+        if (second) numerator.push(second);
+        if (highest) denominator.push(highest);
 
-    let best =
-        null;
+        for (let i = 0; i < unlocked.length; i++) {
 
+            const card = unlocked[i];
 
-    const total =
-        2 ** unlocked.length;
-
-
-    for (
-        let mask = 0;
-        mask < total;
-        mask++
-    ) {
-
-        const numerator =
-            [];
-
-        const denominator =
-            [];
-
-
-        if (second) {
-
-            numerator.push(
-                second
-            );
-
-        }
-
-
-        if (highest) {
-
-            denominator.push(
-                highest
-            );
-
-        }
-
-
-        for (
-            let i = 0;
-            i < unlocked.length;
-            i++
-        ) {
-
-            const card =
-                unlocked[i];
-
-
-            if (
-                mask &
-                (1 << i)
-            ) {
-
-                denominator.push(
-                    card
-                );
-
+            if (mask & (1 << i)) {
+                denominator.push(card);
             } else {
-
-                numerator.push(
-                    card
-                );
-
+                numerator.push(card);
             }
 
         }
 
+        const np = numerator.reduce(
+            (total, card) =>
+                total * getEffectiveCardValue(card, cards),
+            1
+        );
 
-        const np =
-            numerator.reduce(
-
-                (
-                    total,
-                    card
-                ) =>
-
-                    total *
-                    getEffectiveCardValue(
-                        card,
-                        cards
-                    ),
-
-                1
-
-            );
-
-
-        const dp =
-            denominator.reduce(
-
-                (
-                    total,
-                    card
-                ) =>
-
-                    total *
-                    getEffectiveCardValue(
-                        card,
-                        cards
-                    ),
-
-                1
-
-            );
-
+        const dp = denominator.reduce(
+            (total, card) =>
+                total * getEffectiveCardValue(card, cards),
+            1
+        );
 
         const score =
-            (
-                np / dp
-            ) *
-            cards.length *
-            2;
-
+            (np / dp) * cards.length * 2;
 
         const candidate = {
-
             numerator,
-
             denominator,
-
             score
-
         };
 
+        const candidateInRange =
+            score >= config.minValue &&
+            score <= config.maxValue;
 
-        if (!best) {
+        const bestInRange =
+            best &&
+            best.score >= config.minValue &&
+            best.score <= config.maxValue;
 
-            best =
-                candidate;
-
+        // Siempre preferir una puntuación dentro del rango.
+        if (candidateInRange && !bestInRange) {
+            best = candidate;
             continue;
-
         }
 
-
-        const candidateValid =
-            score <= LIMIT;
-
-
-        const bestValid =
-            best.score <= LIMIT;
-
-
-        if (
-            candidateValid &&
-            !bestValid
-        ) {
-
-            best =
-                candidate;
-
+        if (!candidateInRange && bestInRange) {
             continue;
-
         }
 
+        // Calcular qué tan cerca está cada distribución del objetivo.
+        function getDistance(value) {
 
-        if (
-            candidateValid &&
-            bestValid
-        ) {
-
-            const candidateDistance =
-                Math.abs(
-                    LIMIT -
-                    score
-                );
-
-
-            const bestDistance =
-                Math.abs(
-                    LIMIT -
-                    best.score
-                );
-
-
-            if (
-                candidateDistance <
-                bestDistance
-            ) {
-
-                best =
-                    candidate;
-
+            if (value > LIMIT) {
+                return 1000 + (value - LIMIT);
             }
 
-            continue;
+            if (value < config.minValue) {
+                return config.minValue - value;
+            }
 
+            if (value > config.maxValue) {
+                return value - config.maxValue;
+            }
+
+            return Math.abs(value - targetMiddle);
         }
 
+        if (!best) {
+            best = candidate;
+            continue;
+        }
 
         if (
-            !candidateValid &&
-            !bestValid &&
-            score < best.score
+            getDistance(candidate.score) <
+            getDistance(best.score)
         ) {
-
-            best =
-                candidate;
-
+            best = candidate;
         }
 
     }
 
-
     return best;
-
 }
 
 
@@ -3071,8 +2935,8 @@ async function playDealer() {
         if (dealerCards.length >= config.minCards) {
 
             if (
-                score >= config.standValue &&
-                score <= LIMIT
+                score >= config.minValue &&
+                score <= config.maxValue
             ) {
                 break;
             }
@@ -3106,14 +2970,14 @@ async function playDealer() {
                         calculateDealerScore();
 
                     if (
-                        recovered <= LIMIT &&
-                        recovered >= config.standValue
+                        recovered >= config.minValue &&
+                        recovered <= config.maxValue
                     ) {
                         break;
                     }
                 }
             }
-        }
+        }   
 
         /*
          * SACAR UNA CARTA NUEVA
